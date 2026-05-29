@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Redacto output — may contain real redacted documents
+Redacto_Output/
+
+# Local test artifacts
+sample_redacted.*
+
+# Claude local settings — machine-specific, may contain personal file paths
+.claude/settings.local.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
