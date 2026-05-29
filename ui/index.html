@@ -8,103 +8,83 @@
   <link rel="stylesheet" href="styles/app.css" />
 </head>
 <body>
-  <!-- Top bar -->
-  <header class="topbar">
-    <div class="brand">
-      <span class="mark">Redact<b>o</b></span>
-      <span class="tag">redact it before you paste it into AI</span>
+  <div class="app">
+    <div class="main">
+      <!-- Sidebar (Handy-style) -->
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="bar" aria-hidden="true"></span>
+          <span class="name">Redacto</span>
+        </div>
+        <nav class="nav">
+          <a class="active"><span class="ic">▮</span> Redact</a>
+          <a><span class="ic">◫</span> Models</a>
+          <a><span class="ic">⚙</span> Settings</a>
+          <a><span class="ic">ⓘ</span> About</a>
+        </nav>
+      </aside>
+
+      <!-- Main: Redact screen -->
+      <main class="content">
+        <div class="screen">
+          <div class="screen-head">
+            <h1>Redact a document</h1>
+            <div class="tagline">Redact it before you paste it into AI — or send it anywhere.</div>
+            <div class="why">Strips your identity — name, account, address — but keeps the numbers, so an AI can still help without ever seeing who you are. Runs entirely on this machine.</div>
+          </div>
+
+          <div class="dropzone" role="button" tabindex="0">
+            <div class="icon">📄</div>
+            <div class="big">Drop a file, or click to choose</div>
+            <div class="small">PDF · TXT · CSV · MD</div>
+          </div>
+
+          <div class="options">
+            <div class="opt">
+              <span class="label">Redaction level
+                <i class="info" title="Light: IDs only (SSN, accounts, cards). Standard: + names, emails, addresses. Heavy: + amounts and zip codes.">i</i>
+              </span>
+              <div class="segmented" role="group" aria-label="Redaction level">
+                <button aria-pressed="false">Light</button>
+                <button aria-pressed="true">Standard</button>
+                <button aria-pressed="false">Heavy</button>
+              </div>
+            </div>
+            <div class="opt">
+              <span class="label">Replacement
+                <i class="info" title="Fake: realistic stand-ins (a fake SSN/name) so AI can still read the doc. Mask: XXX-XX-1234. Tag: [REDACTED].">i</i>
+              </span>
+              <div class="segmented" role="group" aria-label="Replacement mode">
+                <button aria-pressed="true">Fake</button>
+                <button aria-pressed="false">Mask</button>
+                <button aria-pressed="false">Tag</button>
+              </div>
+            </div>
+            <div class="opt">
+              <span class="label">Custom terms
+                <i class="info" title="Extra words to always redact — your employer, a nickname, a case number — anything the patterns might miss.">i</i>
+              </span>
+              <input class="input" placeholder="e.g. Acme Corp, a nickname…" />
+            </div>
+          </div>
+
+          <button class="btn btn--primary btn--block" disabled>🔒 Redact — drop a file to start</button>
+
+          <div class="result">
+            <div class="icon">⤓</div>
+            <div>Your redacted result and a before/after comparison appear here.</div>
+          </div>
+        </div>
+      </main>
     </div>
-    <span class="badge"><span class="dot"></span> Offline · nothing leaves your machine</span>
-  </header>
 
-  <!-- Main layout -->
-  <main class="layout">
-    <!-- Left: input + controls -->
-    <section class="card" aria-label="Document and settings">
-      <div class="card__head">
-        <h2 class="card__title">Document</h2>
-        <p class="card__sub">PDF or text · processed entirely on this device</p>
-      </div>
-      <div class="card__body">
-        <div class="dropzone" role="button" tabindex="0">
-          <div class="icon">📄</div>
-          <div class="big">Drop a file or click to choose</div>
-          <div class="small">PDF, TXT, CSV, MD — nothing is uploaded</div>
-        </div>
-
-        <div class="field">
-          <span class="label">Redaction level</span>
-          <div class="segmented" role="group" aria-label="Redaction level">
-            <button aria-pressed="false">Light</button>
-            <button aria-pressed="true">Standard</button>
-            <button aria-pressed="false">Heavy</button>
-          </div>
-          <span class="hint">Standard: identity (name, account, address, email) — keeps amounts &amp; dates.</span>
-        </div>
-
-        <div class="field">
-          <span class="label">Replacement</span>
-          <div class="segmented" role="group" aria-label="Replacement mode">
-            <button aria-pressed="true">Fake</button>
-            <button aria-pressed="false">Mask</button>
-            <button aria-pressed="false">Tag</button>
-          </div>
-          <span class="hint">Fake = realistic stand-ins, so AI can still read the doc.</span>
-        </div>
-
-        <div class="field">
-          <label class="label" for="custom">Custom terms</label>
-          <input id="custom" class="input" placeholder="Employer, nicknames, anything patterns miss" />
-        </div>
-
-        <button class="btn btn--primary btn--block">🔒 Redact</button>
-      </div>
-    </section>
-
-    <!-- Right: results -->
-    <section class="card" aria-label="Result">
-      <div class="card__head">
-        <h2 class="card__title">Result</h2>
-        <p class="card__sub">Review before you trust it — a miss is on you, so eyeball it</p>
-      </div>
-      <div class="card__body">
-        <div>
-          <div class="section-h">Changes · 6 redactions</div>
-          <div class="changelog">
-            <div class="row"><span class="pat"><b>SSN</b> · 123-••-••89</span><span class="repl">888-20-9916</span></div>
-            <div class="row"><span class="pat"><b>Email</b> · r•••@•••</span><span class="repl">joseph.clark@letters.net</span></div>
-            <div class="row"><span class="pat"><b>Bank Account</b> · ••••7890</span><span class="repl">Acct #1301908324</span></div>
-            <div class="row"><span class="pat"><b>Phone</b> · (•••) •••-0142</span><span class="repl">(555) 351-8223</span></div>
-            <div class="row"><span class="pat"><b>Name</b> · Taxpayer</span><span class="repl">Richard Hill</span></div>
-            <div class="row"><span class="pat"><b>Address</b></span><span class="repl">418 Cedar Ave</span></div>
-          </div>
-        </div>
-
-        <div>
-          <div class="section-h">Compare</div>
-          <div class="compare">
-            <div class="pane">
-              <div class="pane__head">Original</div>
-              <div class="pane__body">Taxpayer: <mark class="bar">Richard Stone</mark>
-SSN: <mark class="bar">123-45-6789</mark>
-Email: <mark class="bar">r.stone@email.com</mark>
-Account 1234567890
-Annual Income: $124,500.00</div>
-            </div>
-            <div class="pane">
-              <div class="pane__head">Redacted · safe to share</div>
-              <div class="pane__body">Taxpayer: <mark class="repl">Richard Hill</mark>
-SSN: <mark class="repl">888-20-9916</mark>
-Email: <mark class="repl">joseph.clark@letters.net</mark>
-Account <mark class="repl">Acct #1301908324</mark>
-Annual Income: $124,500.00</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <p class="footnote">Redacto · MIT · runs locally · <a href="#">verify with the airplane-mode test</a></p>
+    <!-- Status bar -->
+    <footer class="statusbar">
+      <span class="model" title="Detection model — choose & download in Models">
+        <span class="dot"></span> GLiNER&nbsp;PII <span style="opacity:.6">▾</span>
+      </span>
+      <span class="right"><a>Check for updates</a> · <span>v0.1.0</span></span>
+    </footer>
+  </div>
 </body>
 </html>
