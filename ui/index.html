@@ -8,83 +8,145 @@
   <link rel="stylesheet" href="styles/app.css" />
 </head>
 <body>
-  <div class="app">
-    <div class="main">
-      <!-- Sidebar (Handy-style) -->
-      <aside class="sidebar">
-        <div class="brand">
-          <span class="bar" aria-hidden="true"></span>
-          <span class="name">Redacto</span>
-        </div>
-        <nav class="nav">
-          <a class="active"><span class="ic">▮</span> Redact</a>
-          <a><span class="ic">◫</span> Models</a>
-          <a><span class="ic">⚙</span> Settings</a>
-          <a><span class="ic">ⓘ</span> About</a>
-        </nav>
-      </aside>
-
-      <!-- Main: Redact screen -->
-      <main class="content">
-        <div class="screen">
-          <div class="screen-head">
-            <h1>Redact a document</h1>
-            <div class="tagline">Redact it before you paste it into AI — or send it anywhere.</div>
-            <div class="why">Strips your identity — name, account, address — but keeps the numbers, so an AI can still help without ever seeing who you are. Runs entirely on this machine.</div>
-          </div>
-
-          <div class="dropzone" role="button" tabindex="0">
-            <div class="icon">📄</div>
-            <div class="big">Drop a file, or click to choose</div>
-            <div class="small">PDF · TXT · CSV · MD</div>
-          </div>
-
-          <div class="options">
-            <div class="opt">
-              <span class="label">Redaction level
-                <i class="info" title="Light: IDs only (SSN, accounts, cards). Standard: + names, emails, addresses. Heavy: + amounts and zip codes.">i</i>
-              </span>
-              <div class="segmented" role="group" aria-label="Redaction level">
-                <button aria-pressed="false">Light</button>
-                <button aria-pressed="true">Standard</button>
-                <button aria-pressed="false">Heavy</button>
-              </div>
-            </div>
-            <div class="opt">
-              <span class="label">Replacement
-                <i class="info" title="Fake: realistic stand-ins (a fake SSN/name) so AI can still read the doc. Mask: XXX-XX-1234. Tag: [REDACTED].">i</i>
-              </span>
-              <div class="segmented" role="group" aria-label="Replacement mode">
-                <button aria-pressed="true">Fake</button>
-                <button aria-pressed="false">Mask</button>
-                <button aria-pressed="false">Tag</button>
-              </div>
-            </div>
-            <div class="opt">
-              <span class="label">Custom terms
-                <i class="info" title="Extra words to always redact — your employer, a nickname, a case number — anything the patterns might miss.">i</i>
-              </span>
-              <input class="input" placeholder="e.g. Acme Corp, a nickname…" />
-            </div>
-          </div>
-
-          <button class="btn btn--primary btn--block" disabled>🔒 Redact — drop a file to start</button>
-
-          <div class="result">
-            <div class="icon">⤓</div>
-            <div>Your redacted result and a before/after comparison appear here.</div>
-          </div>
-        </div>
-      </main>
+  <div class="window">
+    <!-- Faux titlebar (the real OS one in Tauri) -->
+    <div class="titlebar">
+      <span class="t-left"><span class="t-bar"></span> Redacto</span>
+      <span class="t-ctrls"><span>—</span><span>▢</span><span>✕</span></span>
     </div>
 
-    <!-- Status bar -->
-    <footer class="statusbar">
-      <span class="model" title="Detection model — choose & download in Models">
-        <span class="dot"></span> GLiNER&nbsp;PII <span style="opacity:.6">▾</span>
-      </span>
-      <span class="right"><a>Check for updates</a> · <span>v0.1.0</span></span>
-    </footer>
+    <div class="app">
+      <div class="main">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+          <div class="brand"><span class="bar"></span><span class="name">Redacto</span></div>
+          <nav class="nav">
+            <a data-nav="redact" class="active"><span class="ic">▮</span> Redact</a>
+            <a data-nav="models"><span class="ic">◫</span> Models</a>
+            <a data-nav="advanced"><span class="ic">⚙</span> Advanced</a>
+            <a data-nav="history"><span class="ic">◷</span> History</a>
+            <a data-nav="about"><span class="ic">ⓘ</span> About</a>
+          </nav>
+        </aside>
+
+        <!-- Content -->
+        <main class="content">
+
+          <!-- ===== REDACT ===== -->
+          <section class="screen" data-screen="redact">
+            <div class="screen-head">
+              <h1>Redact a document</h1>
+              <div class="tagline">Redact it before you paste it into AI — or send it anywhere.</div>
+              <div class="sub">Strips your identity — name, account, address — but keeps the numbers, so an AI can still help without seeing who you are. Runs entirely on this machine.</div>
+            </div>
+            <div class="dropzone" role="button" tabindex="0">
+              <div class="icon">📄</div>
+              <div class="big">Drop a file, or click to choose</div>
+              <div class="small">PDF · TXT · CSV · MD</div>
+            </div>
+            <div class="options">
+              <div class="opt">
+                <span class="label">Redaction level <i class="info" title="Light: IDs only (SSN, accounts, cards). Standard: + names, emails, addresses. Heavy: + amounts and zip codes.">i</i></span>
+                <div class="segmented"><button aria-pressed="false">Light</button><button aria-pressed="true">Standard</button><button aria-pressed="false">Heavy</button></div>
+              </div>
+              <div class="opt">
+                <span class="label">Replacement <i class="info" title="Fake: realistic stand-ins so AI can still read the doc. Mask: XXX-XX-1234. Tag: [REDACTED].">i</i></span>
+                <div class="segmented"><button aria-pressed="true">Fake</button><button aria-pressed="false">Mask</button><button aria-pressed="false">Tag</button></div>
+              </div>
+              <div class="opt">
+                <span class="label">Custom terms <i class="info" title="Extra words to always redact — employer, nickname, case number — anything patterns might miss.">i</i></span>
+                <input class="input" placeholder="e.g. Acme Corp, a nickname…" />
+              </div>
+            </div>
+            <button class="btn btn--primary btn--block" disabled>🔒 Redact — drop a file to start</button>
+            <div class="result"><div class="icon">⤓</div><div>Your redacted result and a before/after comparison appear here.</div></div>
+          </section>
+
+          <!-- ===== MODELS ===== -->
+          <section class="screen" data-screen="models" style="display:none">
+            <div class="screen-head"><h1>Detection models</h1><div class="sub">How Redacto finds sensitive data. More thorough models are larger downloads — and run fully on your machine.</div></div>
+            <div class="group-h">Active</div>
+            <div class="model-card active">
+              <div class="model-card__top">
+                <div><div class="model-card__name">Patterns <span class="pill pill--active">✓ Active</span></div><div class="model-card__desc">Built-in rules — exact on structured IDs (SSN, cards, accounts). No download.</div></div>
+                <div class="meters"><div class="meter">accuracy<div class="track"><div class="fill" style="width:62%"></div></div></div><div class="meter">speed<div class="track"><div class="fill" style="width:96%"></div></div></div></div>
+              </div>
+              <div class="model-card__foot"><span>Built-in · 0 MB</span><span></span></div>
+            </div>
+            <div class="group-h">Available to download</div>
+            <div class="model-card">
+              <div class="model-card__top">
+                <div><div class="model-card__name">GLiNER PII · Small</div><div class="model-card__desc">Adds names, addresses, and context that rules miss. The recommended smart upgrade.</div></div>
+                <div class="meters"><div class="meter">accuracy<div class="track"><div class="fill" style="width:84%"></div></div></div><div class="meter">speed<div class="track"><div class="fill" style="width:70%"></div></div></div></div>
+              </div>
+              <div class="model-card__foot"><span>~200 MB</span><button class="linkbtn">⤓ Download</button></div>
+            </div>
+            <div class="model-card">
+              <div class="model-card__top">
+                <div><div class="model-card__name">GLiNER PII · Large</div><div class="model-card__desc">Most thorough. Larger and slower — for maximum recall.</div></div>
+                <div class="meters"><div class="meter">accuracy<div class="track"><div class="fill" style="width:95%"></div></div></div><div class="meter">speed<div class="track"><div class="fill" style="width:48%"></div></div></div></div>
+              </div>
+              <div class="model-card__foot"><span>~500 MB</span><button class="linkbtn">⤓ Download</button></div>
+            </div>
+          </section>
+
+          <!-- ===== ADVANCED ===== -->
+          <section class="screen" data-screen="advanced" style="display:none">
+            <div class="screen-head"><h1>Advanced</h1><div class="sub">Defaults and storage. All local.</div></div>
+            <div class="panel">
+              <div class="setrow"><span class="k">Default level <i class="info" title="The level pre-selected for new documents.">i</i></span><span class="v"><div class="segmented"><button aria-pressed="false">Light</button><button aria-pressed="true">Standard</button><button aria-pressed="false">Heavy</button></div></span></div>
+              <div class="setrow"><span class="k">Default replacement <i class="info" title="Pre-selected replacement mode.">i</i></span><span class="v"><div class="segmented"><button aria-pressed="true">Fake</button><button aria-pressed="false">Mask</button><button aria-pressed="false">Tag</button></div></span></div>
+              <div class="setrow"><span class="k">Fake-data seed <i class="info" title="Controls the fake values. Same seed = same fakes every run. Change it for a different set.">i</i></span><span class="v"><input class="input" value="redacto" style="width:160px" /></span></div>
+              <div class="setrow"><span class="k">Output folder <i class="info" title="Where redacted files are saved.">i</i></span><span class="v"><input class="input input--path" value="~/Redacto_Output" readonly /><button class="btn btn--secondary">Open</button></span></div>
+              <div class="setrow"><span class="k">Clear local data <i class="info" title="Wipes saved history and output references from this machine.">i</i></span><span class="v"><button class="btn btn--danger">Clear…</button></span></div>
+            </div>
+          </section>
+
+          <!-- ===== HISTORY ===== -->
+          <section class="screen" data-screen="history" style="display:none">
+            <div class="screen-head" style="display:flex; align-items:flex-start; justify-content:space-between; gap:var(--s-4)">
+              <div><h1>History</h1><div class="sub">Recent redactions, kept on this machine.</div></div>
+              <button class="btn btn--secondary">📁 Open output folder</button>
+            </div>
+            <div class="note">🔒 Stored locally only. Redacto keeps the <b>redacted</b> result and basic details — <b>never your original document</b>. Clear it any time.</div>
+            <div class="hist">
+              <div class="hist-item">
+                <div class="hist-item__top"><span class="hist-item__name">statement_redacted.pdf</span><span class="hist-item__date">May 29, 2026 · 2:41 PM</span></div>
+                <div class="hist-item__meta">18 redactions · Standard · Fake</div>
+              </div>
+              <div class="hist-item">
+                <div class="hist-item__top"><span class="hist-item__name">offer_letter_redacted.txt</span><span class="hist-item__date">May 28, 2026 · 9:12 AM</span></div>
+                <div class="hist-item__meta">6 redactions · Standard · Mask</div>
+              </div>
+            </div>
+            <button class="linkbtn" style="align-self:flex-start">Clear history</button>
+          </section>
+
+          <!-- ===== ABOUT ===== -->
+          <section class="screen" data-screen="about" style="display:none">
+            <div class="screen-head"><h1>About</h1></div>
+            <div class="panel">
+              <div class="setrow"><span class="k">Version</span><span class="v">v0.1.0</span></div>
+              <div class="setrow"><span class="k">Source code <i class="info" title="Redacto is open source (MIT).">i</i></span><span class="v"><button class="btn btn--secondary">View on GitHub</button></span></div>
+              <div class="setrow"><span class="k">Support development <i class="info" title="No donations — just a star or a share helps.">i</i></span><span class="v"><button class="btn btn--secondary">★ Star</button><button class="btn btn--secondary">Share</button></span></div>
+              <div class="setrow"><span class="k">App data directory</span><span class="v"><input class="input input--path" value="~/AppData/Roaming/redacto" readonly /><button class="btn btn--secondary">Open</button></span></div>
+              <div class="setrow"><span class="k">Log directory</span><span class="v"><input class="input input--path" value="~/AppData/Local/redacto/logs" readonly /><button class="btn btn--secondary">Open</button></span></div>
+            </div>
+            <div class="group-h">Acknowledgments</div>
+            <div class="ack"><div class="name">GLiNER · Tauri · PyMuPDF</div><div class="body">Redacto's smart detection builds on GLiNER, ships in a Tauri shell, and reads PDFs with PyMuPDF. Thanks to those communities.</div></div>
+          </section>
+
+        </main>
+      </div>
+
+      <!-- Status bar -->
+      <footer class="statusbar">
+        <span class="model" title="Detection model — choose & download in Models"><span class="dot"></span> Patterns <span style="opacity:.6">▾</span></span>
+        <span class="right"><a>Check for updates</a> · <span>v0.1.0</span></span>
+      </footer>
+    </div>
   </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
