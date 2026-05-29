@@ -24,3 +24,6 @@ sample_redacted.*
 Thumbs.db
 .idea/
 .vscode/
+
+# Local-only decision log (kept on disk, never published)
+DECISIONS.md
