@@ -27,6 +27,10 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional
 
+# Privacy guarantee: disable Gradio's outbound telemetry before gradio is imported
+# anywhere. A "nothing leaves your machine" tool must not phone home — ever.
+os.environ["GRADIO_ANALYTICS_ENABLED"] = "False"
+
 # ============================================================
 # FAKE DATA GENERATOR
 # Deterministic: same input always produces same fake output.
@@ -582,7 +586,7 @@ def build_ui():
         return summary, original_text, redacted_text
 
     # --- UI Layout ---
-    with gr.Blocks() as app:
+    with gr.Blocks(analytics_enabled=False) as app:
 
         gr.HTML("""
         <div class="main-header">
@@ -817,7 +821,7 @@ def launch_ui():
 
     app = build_ui()
     launch_kwargs = dict(
-        server_name="0.0.0.0",
+        server_name="127.0.0.1",  # localhost only — unreachable from other devices on your network
         server_port=7860,
         show_error=True,
         share=False,
