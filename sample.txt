@@ -1,0 +1,31 @@
+CONFIDENTIAL CLIENT INTAKE FORM
+
+Taxpayer: Robert Johnson
+Spouse: Linda Johnson
+SSN: 123-45-6789
+ITIN: 912-70-1234
+Date of Birth: 03/15/1985
+
+Contact Information
+-------------------
+Phone: (206) 555-0142
+Email: robert.johnson@example.com
+Home Address: 123 Main Street
+
+Financial Details
+-----------------
+Account 1234567890
+Routing 021000021
+Credit Card: 4111-1111-1111-1111
+EIN: 91-1234567
+Annual Income: $124,500.00
+Refund Due: $3,250.75
+
+Immigration
+-----------
+Passport# A12345678
+Visa# AB12345678
+Alien 123456789
+
+Mailing Zip: 98052
+Employer: Acme Corporation
