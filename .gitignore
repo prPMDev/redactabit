@@ -27,3 +27,6 @@ Thumbs.db
 
 # Local-only decision log (kept on disk, never published)
 DECISIONS.md
+
+# Local working docs (design, planning) - never published
+docs/
