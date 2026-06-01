@@ -6,6 +6,7 @@ const screens = document.querySelectorAll<HTMLElement>("[data-screen]");
 function show(name: string) {
   navLinks.forEach((a) => a.classList.toggle("active", a.dataset.nav === name));
   screens.forEach((s) => { s.style.display = s.dataset.screen === name ? "" : "none"; });
+  if (name === "history") renderHistory();
 }
 navLinks.forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); show(a.dataset.nav!); }));
 show("redact");
@@ -79,6 +80,7 @@ redactBtn.addEventListener("click", () => {
   const custom = customInput.value.split(",").map((t) => t.trim()).filter(Boolean);
   const { text, changes } = redact(currentText, level, mode, custom, new Faker("redacto"));
   renderResult(currentText, text, changes);
+  logRun(currentName, currentText.length, level, mode, changes);
 });
 
 // ───────── render ─────────
@@ -136,3 +138,55 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
     URL.revokeObjectURL(a.href);
   });
 }
+
+// ───────── run log (privacy-safe: metadata + counts ONLY, never the PII) ─────────
+const LOG_KEY = "redacto.runs.v1";
+interface RunRecord { ts: string; file: string; chars: number; level: number; mode: Mode; total: number; byType: Record<string, number>; }
+
+function readLog(): RunRecord[] {
+  try { return JSON.parse(localStorage.getItem(LOG_KEY) || "[]") as RunRecord[]; } catch { return []; }
+}
+function logRun(file: string, chars: number, level: number, mode: Mode, changes: Change[]) {
+  const byType: Record<string, number> = {};
+  for (const c of changes) byType[c.pattern] = (byType[c.pattern] || 0) + 1;
+  const rec: RunRecord = { ts: new Date().toISOString(), file, chars, level, mode, total: changes.length, byType };
+  const log = readLog();
+  log.push(rec);
+  if (log.length > 200) log.splice(0, log.length - 200); // cap size
+  localStorage.setItem(LOG_KEY, JSON.stringify(log));
+}
+
+const LEVEL_NAME = ["", "Light", "Standard", "Heavy"];
+const histList = document.querySelector<HTMLElement>('[data-screen="history"] .hist')!;
+function renderHistory() {
+  const log = readLog().slice().reverse(); // newest first
+  if (log.length === 0) {
+    histList.innerHTML = `<div class="hist-item"><div class="hist-item__meta">No runs yet — redact a document and it'll be logged here.</div></div>`;
+    return;
+  }
+  histList.innerHTML = log.map((r) => {
+    const when = new Date(r.ts).toLocaleString();
+    const breakdown = Object.entries(r.byType).map(([k, v]) => `${escapeHtml(k)}×${v}`).join(" · ") || "—";
+    return `<div class="hist-item">
+      <div class="hist-item__top"><span class="hist-item__name">${escapeHtml(r.file)}</span><span class="hist-item__date">${escapeHtml(when)}</span></div>
+      <div class="hist-item__meta">${r.total} redaction${r.total === 1 ? "" : "s"} · ${LEVEL_NAME[r.level] || r.level} · ${escapeHtml(r.mode)}</div>
+      <div class="hist-item__meta">${breakdown}</div>
+    </div>`;
+  }).join("");
+}
+
+document.querySelector<HTMLButtonElement>("#exportLog")?.addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(readLog(), null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "redacto-log.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+let clearArmed = false;
+const clearBtn = document.querySelector<HTMLButtonElement>("#clearHist");
+clearBtn?.addEventListener("click", () => {
+  if (!clearArmed) { clearArmed = true; clearBtn!.textContent = "Click again to clear"; setTimeout(() => { clearArmed = false; clearBtn!.textContent = "Clear history"; }, 2500); return; }
+  localStorage.removeItem(LOG_KEY); clearArmed = false; clearBtn!.textContent = "Clear history"; renderHistory();
+});
