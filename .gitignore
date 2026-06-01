@@ -34,3 +34,9 @@ node_modules/
 /target/
 src-tauri/target/
 package-lock.json
+
+# Vite build output
+ui/dist/
+
+# Local preview/launch config
+.claude/launch.json
