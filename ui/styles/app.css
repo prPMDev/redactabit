@@ -1,17 +1,14 @@
 /* Redacto — base + components. All values reference tokens.css. */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
-body { margin: 0; background: #05060a; color: var(--text); font-family: var(--font-sans);
-  font-size: var(--fs-md); line-height: var(--lh); -webkit-font-smoothing: antialiased;
-  display: grid; place-items: center; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans);
+  font-size: var(--fs-md); line-height: var(--lh); -webkit-font-smoothing: antialiased; }
 h1, h2, h3, p { margin: 0; }
 button, input { font-family: inherit; }
 
 /* ===== Window frame (preview of the real fixed-size app window) ===== */
-.window { width: 1000px; height: 720px; max-width: 97vw; max-height: 95vh;
-  display: flex; flex-direction: column; background: var(--bg);
-  border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
-  box-shadow: 0 30px 90px rgba(0,0,0,.6); }
+.window { width: 100%; height: 100vh;
+  display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
 .titlebar { height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
   padding: 0 var(--s-3); background: var(--surface); border-bottom: 1px solid var(--border); }
 .titlebar .t-left { display: flex; align-items: center; gap: var(--s-2); color: var(--text-2); font-size: var(--fs-xs); }
