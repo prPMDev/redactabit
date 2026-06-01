@@ -99,21 +99,12 @@
           <!-- ===== HISTORY ===== -->
           <section class="screen" data-screen="history" style="display:none">
             <div class="screen-head" style="display:flex; align-items:flex-start; justify-content:space-between; gap:var(--s-4)">
-              <div><h1>History</h1><div class="sub">Recent redactions, kept on this machine.</div></div>
-              <button class="btn btn--secondary">📁 Open output folder</button>
+              <div><h1>History</h1><div class="sub">Every redaction run, logged on this machine.</div></div>
+              <button class="btn btn--secondary" id="exportLog">⤓ Export log</button>
             </div>
-            <div class="note">🔒 Stored locally only. Redacto keeps the <b>redacted</b> result and basic details — <b>never your original document</b>. Clear it any time.</div>
-            <div class="hist">
-              <div class="hist-item">
-                <div class="hist-item__top"><span class="hist-item__name">statement_redacted.pdf</span><span class="hist-item__date">May 29, 2026 · 2:41 PM</span></div>
-                <div class="hist-item__meta">18 redactions · Standard · Fake</div>
-              </div>
-              <div class="hist-item">
-                <div class="hist-item__top"><span class="hist-item__name">offer_letter_redacted.txt</span><span class="hist-item__date">May 28, 2026 · 9:12 AM</span></div>
-                <div class="hist-item__meta">6 redactions · Standard · Mask</div>
-              </div>
-            </div>
-            <button class="linkbtn" style="align-self:flex-start">Clear history</button>
+            <div class="note">🔒 Logged locally only. Redacto records just the <b>date, file name, level/mode, and counts by type</b> — <b>never your data, the matched values, or the redacted text</b>. Clear it any time.</div>
+            <div class="hist"></div>
+            <button class="linkbtn" id="clearHist" style="align-self:flex-start">Clear history</button>
           </section>
 
           <!-- ===== ABOUT ===== -->
