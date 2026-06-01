@@ -30,3 +30,7 @@ DECISIONS.md
 
 # Local working docs (design, planning) - never published
 docs/
+node_modules/
+/target/
+src-tauri/target/
+package-lock.json

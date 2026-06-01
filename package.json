@@ -1,0 +1,12 @@
+{
+  "name": "redacto",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Redacto — local, offline document redaction. Nothing leaves your machine.",
+  "scripts": {
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}
