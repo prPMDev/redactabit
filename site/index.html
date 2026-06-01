@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redacto — Redact it before you paste it into AI</title>
+  <meta name="description" content="The free, open-source app that strips your identity from any document — and never leaves your machine." />
+  <meta name="theme-color" content="#0e1014" />
+  <meta name="color-scheme" content="dark" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Open Graph / Twitter (text only; self-hosted). TODO: add a real PNG og-image once the demo clip / screenshot exists. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Redacto — Redact it before you paste it into AI" />
+  <meta property="og:description" content="The free, open-source app that strips your identity from any document — and never leaves your machine." />
+  <meta property="og:url" content="https://prpmdev.github.io/redacto/" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Redacto — Redact it before you paste it into AI" />
+  <meta name="twitter:description" content="The free, open-source app that strips your identity from any document — and never leaves your machine." />
+</head>
+<body>
+  <!-- ===== Nav ===== -->
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="#top" aria-label="Redacto home">
+        <span class="bar" aria-hidden="true"></span>
+        <span class="name">Redacto</span>
+      </a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="#download">Download</a>
+        <a href="#how">How it works</a>
+        <!-- Docs: points at the repo README until the docs site ships (see plan). -->
+        <a href="https://github.com/prPMDev/redacto#readme">Docs</a>
+        <a href="https://github.com/prPMDev/redacto">GitHub</a>
+      </nav>
+      <div class="nav__right">
+        <a class="btn btn--secondary btn--sm" href="https://github.com/prPMDev/redacto" aria-label="Star Redacto on GitHub">
+          <span aria-hidden="true">★</span> Star on GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- ===== Hero ===== -->
+    <section class="hero" id="download">
+      <div class="container">
+        <span class="eyebrow"><span class="dot" aria-hidden="true"></span> Local-only · Open source</span>
+        <h1>Redact it before you paste it into AI.</h1>
+        <p class="sub">The free, open-source app that strips your identity from any document — and never leaves your machine.</p>
+        <div class="cta-row">
+          <!-- TODO: once installers are published, point the Windows button at the direct .msi/NSIS asset (or /releases/latest). -->
+          <a class="btn btn--primary" data-download href="https://github.com/prPMDev/redacto/releases">Download for Windows</a>
+          <a class="btn btn--secondary" href="https://github.com/prPMDev/redacto/releases">Other platforms</a>
+        </div>
+        <p class="reassure">Windows · macOS · Linux — no account, no upload.</p>
+      </div>
+    </section>
+
+    <!-- ===== Demo: before → after (the proof). Placeholder for the recorded clip. ===== -->
+    <section class="section demo">
+      <div class="container">
+        <div class="demo__card">
+          <div class="demo__bar">
+            <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="file">bank-statement.pdf</span>
+            <span class="demo__wifi">Wi-Fi: <span class="off">off</span> ✈</span>
+          </div>
+          <div class="demo__grid">
+            <div class="pane">
+              <div class="pane__label">Before</div>
+<p class="doc"><span class="k">Name:</span>    Michael Thompson
+<span class="k">SSN:</span>     482-19-3756
+<span class="k">Account:</span> 1029384756
+<span class="k">Balance:</span> $48,210.55</p>
+            </div>
+            <div class="pane">
+              <div class="pane__label">After</div>
+<p class="doc"><span class="k">Name:</span>    <mark class="repl">Daniel Foster</mark>
+<span class="k">SSN:</span>     <mark class="repl">837-44-1920</mark>
+<span class="k">Account:</span> <mark class="repl">6647201938</mark>
+<span class="k">Balance:</span> <span class="kept">$48,210.55</span></p>
+            </div>
+          </div>
+          <div class="demo__legend">
+            <span class="swatch"><span class="chip repl" aria-hidden="true"></span> Realistic fake data</span>
+            <span class="swatch"><span class="chip keep" aria-hidden="true"></span> Numbers kept — so AI can still help</span>
+          </div>
+        </div>
+        <p class="demo__note"><span class="play" aria-hidden="true">▶</span> Full before → after clip coming — recorded with Wi-Fi off, so you can watch it work with nothing connected.</p>
+      </div>
+    </section>
+
+    <!-- ===== Value cards ===== -->
+    <section class="section">
+      <div class="container">
+        <div class="cards">
+          <article class="card">
+            <span class="ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            </span>
+            <h3>Private</h3>
+            <p>Nothing leaves your machine. Turn your Wi-Fi off and watch it still work.</p>
+          </article>
+          <article class="card">
+            <span class="ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 7 4 12 9 17"/><polyline points="15 7 20 12 15 17"/></svg>
+            </span>
+            <h3>Open Source</h3>
+            <p>MIT-licensed. Read the code — don't just trust the promise.</p>
+          </article>
+          <article class="card">
+            <span class="ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9a3 3 0 1 0 0 6c2.2 0 3.3-2 5-3 1.7-1 2.8-3 5-3a3 3 0 1 1 0 6c-2.2 0-3.3-2-5-3-1.7-1-2.8-3-5-3z"/></svg>
+            </span>
+            <h3>Free</h3>
+            <p>Free, forever. No account, no upload, no catch.</p>
+          </article>
+          <article class="card">
+            <span class="ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="m8 12 4 4 4-4"/><path d="M5 20h14"/></svg>
+            </span>
+            <h3>Simple</h3>
+            <p>Drop a file, get a clean one. Fake data keeps it readable — so AI can still help.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== How it works ===== -->
+    <section class="section" id="how">
+      <div class="container">
+        <h2>How it works</h2>
+        <p class="lede">Three steps, all on your machine.</p>
+        <div class="steps">
+          <div class="step">
+            <h3>Drop a file</h3>
+            <p>A PDF or text file goes in. It never gets uploaded anywhere.</p>
+          </div>
+          <div class="step">
+            <h3>Identity stripped, numbers kept</h3>
+            <p>Names, SSNs, and accounts become realistic fake data. The figures that matter stay put.</p>
+          </div>
+          <div class="step">
+            <h3>Paste into AI or share</h3>
+            <p>Get a clean, readable copy you can hand to a chatbot — or anyone — without leaking who you are.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <div class="footer-links">
+        <span>Built by <a href="https://github.com/prPMDev">prPMDev</a></span>
+        <span class="sep" aria-hidden="true">·</span>
+        <a href="https://github.com/prPMDev/redacto/blob/main/LICENSE">MIT License</a>
+        <span class="sep" aria-hidden="true">·</span>
+        <a href="https://github.com/prPMDev/redacto">GitHub</a>
+      </div>
+      <p class="footer-creed"><b>No analytics. No trackers. No CDNs.</b> This page is as private as the app.</p>
+    </div>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
