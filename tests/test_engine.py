@@ -227,6 +227,24 @@ class TestPatternNegative:
     def test_street_no_number(self):
         assert "Street Address" not in pattern_names("Main Street", level=2)
 
+    def test_street_does_not_span_newline(self):
+        # Regression: a loose number at a line end must not join the next line's
+        # word into a fake "street". Repro = tail digits of an unmatched intl phone
+        # ("...0958") followed by a section header.
+        text = "Mobile: +44 20 7946 0958\n\nCONTACT\n  Phone: (415) 555-0188"
+        assert "Street Address" not in pattern_names(text, level=2)
+
+    def test_street_all_caps_not_a_street(self):
+        # Case-sensitive: an ALL-CAPS word must not pose as a Title-Case street
+        # (e.g. "CONTA" + "CT" reading as a bogus "Ct").
+        assert "Street Address" not in pattern_names("5 CONTACT", level=2)
+        assert "Street Address" not in pattern_names("12 EXIT", level=2)
+
+    def test_street_clean_still_matches(self):
+        # Guard: the hardening must not regress real, single-line addresses.
+        for t in ["88 Maple Avenue", "123 Main Street", "5 Oak Ct"]:
+            assert "Street Address" in pattern_names(t, level=2), f"Failed on: {t}"
+
     def test_dollar_no_sign(self):
         assert "Dollar Amounts" not in pattern_names("1234.56", level=3)
 

@@ -84,6 +84,16 @@ class Faker:
         r = self._r(o); return f"A#{r.randint(100000000,999999999)}"
     def visa(self, o):
         r = self._r(o); return f"Visa# {''.join(r.choice(string.ascii_uppercase) for _ in range(2))}{r.randint(10000000,99999999)}"
+    def pan(self, o):
+        r = self._r(o); u = string.ascii_uppercase
+        return f"{r.choice(u)}{r.choice(u)}{r.choice(u)}Z{r.choice(u)}{r.randint(1000,9999)}{r.choice(u)}"  # 4th char Z = invalid holder type, so never a real PAN
+    def refid(self, o):
+        r = self._r(o); ch = string.ascii_uppercase + "23456789"
+        return "# " + "".join(r.choice(ch) for _ in range(10))
+    def cityline(self, o):
+        r = self._r(o)
+        city = r.choice(["Springdale","Riverton","Fairview","Brookside","Lakewood","Hillcrest"])
+        return f"{city}, {r.choice(['OH','IL','TX','CO','WA','GA'])} {r.randint(10000,99999)}"
     def zipcode(self, o):
         r = self._r(o); return str(r.randint(10000,99999))
     def amount(self, o):
@@ -108,6 +118,11 @@ def _mask_acct(o):
     d = re.sub(r'\D','',o); return f"Acct #{'X'*(len(d)-4)}{d[-4:]}" if len(d)>=4 else "Acct #XXXX"
 def _mask_card(o):
     d = re.sub(r'\D','',o); return f"XXXX-XXXX-XXXX-{d[-4:]}" if len(d)>=4 else "XXXX-XXXX-XXXX-XXXX"
+def _mask_pan(o):
+    s = o.strip(); return f"{'X'*(len(s)-4)}{s[-4:]}" if len(s)>=4 else "XXXXXXXXXX"
+def _mask_id(o):
+    v = re.sub(r'^[#\s:]+', '', o)
+    return f"# {'X'*(len(v)-4)}{v[-4:]}" if len(v)>=4 else "# XXXX"
 def _mask_name(o):
     return ' '.join(w[0]+'.' for w in o.strip().split() if w)
 
@@ -135,28 +150,49 @@ PATTERNS = [
         "[ITIN REDACTED]", "itin", _mask_ssn, 1, priority=100),
     Pat("SSN",            r'\b\d{3}-\d{2}-\d{4}\b',
         "[SSN REDACTED]", "ssn", _mask_ssn, 1, priority=90),
-    Pat("Bank Account",   r'(?i)(?:account|acct|acct\.|a/c)[\s#:]*(\d{8,17})',
+    # Optional "Number/No./Num" between label and digits ("Account Number:"); digits may
+    # carry single space/dash separators (8-17 digits total).
+    Pat("Bank Account",   r'(?i)(?:account|acct|acct\.|a/c)(?:\s*(?:number|no\.?|num\.?))?[\s#:]*(\d(?:[ -]?\d){7,16})',
         "[ACCOUNT REDACTED]", "account", _mask_acct, 1, priority=80),
     Pat("Routing Number", r'(?i)(?:routing|aba|transit)[\s#:]*\d{9}',
         "[ROUTING REDACTED]", "routing", None, 1, priority=80),
     Pat("Credit Card",    r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b',
         "[CARD REDACTED]", "card", _mask_card, 1, priority=85),
-    Pat("Alien/USCIS#",   r'(?i)(?:alien|uscis|a[-#])\s*\d{7,9}',
+    Pat("Alien/USCIS#",   r'(?i)\b(?:alien|uscis|a[-#])\s*\d{7,9}',
         "[IMMIGRATION# REDACTED]", "alien", None, 1, priority=95),
     Pat("Passport",       r'(?i)passport[\s#:]*[A-Z0-9]{6,12}',
         "[PASSPORT REDACTED]", "passport", None, 1, priority=80),
     Pat("Visa Number",    r'(?i)visa[\s#:]*[A-Z0-9]{8,12}',
         "[VISA# REDACTED]", "visa", None, 1, priority=80),
+    Pat("PAN (India)",    r'\b[A-Z]{5}[0-9]{4}[A-Z]\b',
+        "[PAN REDACTED]", "pan", _mask_pan, 1, priority=88),
+    # Generic labeled identifier: "#" + a long caps/digits code is essentially always an ID
+    # (Envelope #, Confirmation #, Reference #...). Specific ID rules outrank it on overlaps.
+    Pat("Labeled ID",     r'#\s*:?\s*([A-Z0-9][A-Z0-9-]{5,24})\b',
+        "[ID REDACTED]", "refid", _mask_id, 1, priority=70, flags=0),
 
     # Level 2 — Contact & Identity
     Pat("EIN",            r'\b\d{2}-\d{7}\b',
         "[EIN REDACTED]", "ein", None, 2, priority=70),
     Pat("Phone",          r'(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b',
         "[PHONE REDACTED]", "phone", _mask_phone, 2, priority=50),
-    Pat("Email",          r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
+    Pat("Email",          r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b',
         "[EMAIL REDACTED]", "email", _mask_email, 2, priority=60),
-    Pat("Street Address", r'\b\d{1,6}\s+(?:[A-Z][a-z]+\s*){1,4}(?:St|Street|Ave|Avenue|Blvd|Boulevard|Dr|Drive|Ln|Lane|Rd|Road|Ct|Court|Way|Pl|Place|Cir|Circle)\b\.?',
-        "[ADDRESS REDACTED]", "street", None, 2, priority=40),
+    # flags=0 (case-sensitive) so ALL-CAPS headers can't pose as Title-Case streets
+    # (e.g. "CONTA"+"CT" reading as a bogus "Ct"); [^\S\n] instead of \s so a match
+    # can't span newlines and swallow a loose number plus the next line's word.
+    Pat("Street Address", r'\b\d{1,6}[^\S\n]+(?:[A-Z][a-z]+[^\S\n]*){1,4}(?:St|Street|Ave|Avenue|Blvd|Boulevard|Dr|Drive|Ln|Lane|Rd|Road|Ct|Court|Way|Pl|Place|Cir|Circle|Ter|Terrace|Pkwy|Parkway|Hwy|Highway|Plaza|Sq|Square|Trl|Trail|Loop)\b\.?',
+        "[ADDRESS REDACTED]", "street", None, 2, priority=40, flags=0),
+    # ALL-CAPS variant (statements print mail blocks in caps). Caps words + a standalone
+    # caps suffix token — still case-sensitive, so prose can't pose as a street.
+    Pat("Street Address", r'\b\d{1,6}[^\S\n]+(?:[A-Z]{2,}[^\S\n]+){1,4}(?:ST|STREET|AVE|AVENUE|BLVD|BOULEVARD|DR|DRIVE|LN|LANE|RD|ROAD|CT|COURT|WAY|PL|PLACE|CIR|CIRCLE|TER|TERRACE|PKWY|PARKWAY|HWY|HIGHWAY|PLAZA|SQ|SQUARE|TRL|TRAIL|LOOP)\b\.?',
+        "[ADDRESS REDACTED]", "street", None, 2, priority=40, flags=0),
+    # The classic second address line ("Springfield, IL 62704" / "SPRINGFIELD IL 62704") —
+    # city + 2-letter state + ZIP is a strong shape; models miss it inside long docs.
+    Pat("City/State ZIP", r'\b[A-Z][a-zA-Z]+(?:[^\S\n]+[A-Z][a-zA-Z]+){0,2},[^\S\n]*[A-Z]{2}[^\S\n]+\d{5}(?:-\d{4})?\b',
+        "[ADDRESS REDACTED]", "cityline", None, 2, priority=35, flags=0),
+    Pat("City/State ZIP", r'\b[A-Z]{3,}(?:[^\S\n]+[A-Z]{3,}){0,2}[^\S\n]+[A-Z]{2}[^\S\n]+\d{5}(?:-\d{4})?\b',
+        "[ADDRESS REDACTED]", "cityline", None, 2, priority=35, flags=0),
     Pat("Date of Birth",  r'(?i)(?:dob|date\s+of\s+birth|birth\s*date|born)[\s:]*\d{1,2}[/\-]\d{1,2}[/\-]\d{2,4}',
         "[DOB REDACTED]", "dob", None, 2, priority=60),
     Pat("Named Fields",   r'(?i)(?:taxpayer|spouse|dependent|employer|client)[^\S\n:]*:[^\S\n]*([A-Z][a-z]+(?:[^\S\n]+[A-Z][a-z]+){1,3})',
