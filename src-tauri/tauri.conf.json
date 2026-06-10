@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Redacto",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "identifier": "com.redacto.app",
   "build": {
     "frontendDist": "../ui/dist",
@@ -18,11 +18,12 @@
         "minWidth": 880,
         "minHeight": 600,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection,CalculateNativeWinOcclusion --disable-renderer-backgrounding --disable-background-timer-throttling"
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; worker-src 'self' blob:; connect-src 'self' ws: https://huggingface.co https://*.huggingface.co https://*.hf.co https://cdn.jsdelivr.net"
     }
   },
   "bundle": {
