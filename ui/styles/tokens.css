@@ -19,6 +19,7 @@
   --primary-hover: #45e3cf;
   --primary-press: #14b8a6;
   --on-primary: #04201c;
+  --primary-soft: rgba(45, 212, 191, 0.15);  /* accent wash: focus ring, active pill */
 
   /* ===== Color: semantic ===== */
   --success: #34d399;
@@ -34,16 +35,59 @@
   /* ===== Typography (system stack → offline, native feel) ===== */
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
-  --fs-xs: 12px; --fs-sm: 13px; --fs-md: 14px; --fs-lg: 16px; --fs-xl: 20px; --fs-2xl: 28px;
+  --fs-xs: 12px; --fs-sm: 13px; --fs-md: 14px; --fs-lg: 16px; --fs-xl: 17px; --fs-2xl: 21px;
   --fw-normal: 400; --fw-medium: 500; --fw-semibold: 600;
-  --lh: 1.55;
+  --lh: 1.5;
 
   /* ===== Space (4px base) ===== */
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px;
 
   /* ===== Radius / Shadow / Motion ===== */
   --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-full: 9999px;
-  --shadow-1: 0 1px 2px rgba(0,0,0,.30);
-  --shadow-2: 0 10px 30px rgba(0,0,0,.40);
+  --shadow-1: 0 1px 2px rgba(0,0,0,.32);
+  --shadow-2: 0 12px 32px rgba(0,0,0,.46);
   --dur: 160ms; --ease: cubic-bezier(.2,.6,.2,1);
+  --dur-fill: 320ms;                         /* progress-fill width transition */
+  --dur-shimmer: 1150ms;                     /* live "working" shimmer sweep */
+  --ease-shimmer: cubic-bezier(.4,0,.2,1);
+}
+
+/* ===== Light palette — clean / minimal (Handy-like).
+   Overrides only the colors; type, space, radius, motion stay shared.
+   Wired by a [data-theme="light"] toggle on <html> (set elsewhere). ===== */
+[data-theme="light"] {
+  /* surfaces — white cards on a soft off-white field */
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f1f3f5;
+  --surface-3: #e7eaee;
+  --border: #e4e7ec;
+  --border-strong: #cdd3dc;
+
+  /* text */
+  --text: #161a20;
+  --text-2: #545b67;
+  --text-muted: #6b7280;        /* AA-legible on white for small meta */
+
+  /* accent — teal-700 doubles as legible accent TEXT on white and as a fill */
+  --primary: #0f766e;
+  --primary-hover: #115e59;     /* darkens on hover so white label stays AA */
+  --primary-press: #134e4a;
+  --on-primary: #ffffff;
+  --primary-soft: rgba(15, 118, 110, 0.12);
+
+  /* semantic — darkened for contrast on light */
+  --success: #047857;
+  --warning: #b45309;
+  --danger: #dc2626;
+  --info: #2563eb;
+
+  /* redaction motif — keep the bar dark; it *is* the redaction */
+  --redacted: rgba(15, 118, 110, 0.12);
+  --redacted-ring: rgba(15, 118, 110, 0.40);
+  --redacted-bar: #0a0d12;
+
+  /* shadow — softer + cooler on light */
+  --shadow-1: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-2: 0 12px 30px rgba(16, 24, 40, 0.12);
 }

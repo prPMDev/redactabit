@@ -1,4 +1,4 @@
-/* Redacto — base + components. All values reference tokens.css. */
+/* Redacto base + components. All values reference tokens.css. */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans);
@@ -37,11 +37,11 @@ button, input { font-family: inherit; }
 .nav a .ic { width: 16px; text-align: center; opacity: .85; }
 
 /* ===== Content ===== */
-.content { flex: 1; overflow: auto; padding: var(--s-5) var(--s-6); }
+.content { flex: 1; overflow: auto; padding: var(--s-4) var(--s-6); }
 .screen { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--s-3); }
-.screen-head h1 { font-size: var(--fs-2xl); font-weight: var(--fw-semibold); letter-spacing: -.02em; }
-.screen-head .sub { color: var(--text-2); font-size: var(--fs-sm); margin-top: var(--s-2); max-width: 56ch; }
-.screen-head .tagline { color: var(--primary); font-size: var(--fs-md); font-weight: var(--fw-medium); margin-top: var(--s-2); }
+.screen-head h1 { font-size: var(--fs-2xl); font-weight: var(--fw-semibold); letter-spacing: -.02em; line-height: 1.2; }
+.screen-head .sub { color: var(--text-2); font-size: var(--fs-sm); margin-top: var(--s-1); max-width: 56ch; }
+.screen-head .tagline { color: var(--primary); font-size: var(--fs-md); font-weight: var(--fw-medium); margin-top: var(--s-1); }
 .group-h { font-size: var(--fs-xs); color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin: var(--s-3) 0 var(--s-1); }
 
 /* ===== Info icon ===== */
@@ -52,18 +52,24 @@ button, input { font-family: inherit; }
 
 /* ===== Dropzone ===== */
 .dropzone { display: flex; flex-direction: column; align-items: center; gap: var(--s-2);
-  padding: var(--s-5) var(--s-4); text-align: center; border: 1.5px dashed var(--border-strong);
+  padding: var(--s-4) var(--s-4); text-align: center; border: 1.5px dashed var(--border-strong);
   border-radius: var(--r-lg); background: var(--surface); color: var(--text-2); cursor: pointer;
   transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease); }
 .dropzone:hover { border-color: var(--primary); background: var(--surface-2); }
-.dropzone .icon { font-size: 26px; }
+.dropzone .icon { font-size: 22px; }
 .dropzone .big { color: var(--text); font-weight: var(--fw-medium); font-size: var(--fs-lg); }
 .dropzone .small { font-size: var(--fs-xs); color: var(--text-muted); }
 
 /* ===== Options / settings rows ===== */
-.options { display: flex; flex-direction: column; gap: var(--s-4); padding: var(--s-4);
+.options { display: flex; flex-direction: column; gap: 0; padding: 0 var(--s-4);
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); }
 .opt, .setrow { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); }
+.opt { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.opt:last-child { border-bottom: 0; }
+/* Custom terms is free text, not a 3-way choice, so give it a full-width field
+   (the explanation lives in the info tooltip, like the other rows). */
+.opt--custom .label { flex-shrink: 0; }
+.opt--custom .input { flex: 1 1 220px; min-width: 0; }
 .setrow { padding: var(--s-4) 0; border-bottom: 1px solid var(--border); }
 .setrow:last-child { border-bottom: 0; }
 .opt .label, .setrow .k { font-size: var(--fs-sm); font-weight: var(--fw-medium); color: var(--text); display: inline-flex; align-items: center; }
@@ -71,14 +77,14 @@ button, input { font-family: inherit; }
 .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 0 var(--s-4); }
 
 .segmented { display: inline-flex; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 3px; gap: 3px; }
-.segmented button { border: 0; background: transparent; color: var(--text-2); padding: var(--s-2) var(--s-3); border-radius: calc(var(--r-md) - 3px); font-size: var(--fs-sm); cursor: pointer; transition: all var(--dur) var(--ease); }
+.segmented button { border: 0; background: transparent; color: var(--text-2); padding: 6px var(--s-3); border-radius: calc(var(--r-md) - 3px); font-size: var(--fs-sm); cursor: pointer; transition: all var(--dur) var(--ease); }
 .segmented button:hover { color: var(--text); }
 .segmented button[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); font-weight: var(--fw-medium); }
 
 .input { padding: var(--s-2) var(--s-3); color: var(--text); background: var(--surface-2); border: 1px solid var(--border);
   border-radius: var(--r-md); font-size: var(--fs-sm); transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
 .input::placeholder { color: var(--text-muted); }
-.input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(45,212,191,.15); }
+.input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
 .input--path { font-family: var(--font-mono); font-size: var(--fs-xs); width: 300px; color: var(--text-2); }
 
 /* ===== Buttons ===== */
@@ -99,21 +105,34 @@ button, input { font-family: inherit; }
 .linkbtn:hover { color: var(--text); }
 
 /* ===== Result empty state ===== */
-.result { border: 1px dashed var(--border); border-radius: var(--r-lg); padding: var(--s-4) var(--s-4);
-  text-align: center; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: var(--s-2); }
-.result .icon { font-size: 20px; opacity: .55; }
+.result { border: 1px dashed var(--border); border-radius: var(--r-lg); padding: var(--s-2) var(--s-4);
+  text-align: center; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: var(--s-1); }
+.result .icon { font-size: 16px; opacity: .55; }
 
 /* ===== Model cards ===== */
 .model-card { border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--s-4); background: var(--surface);
   display: flex; flex-direction: column; gap: var(--s-3); }
 .model-card.active { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
-.model-card__top { display: flex; justify-content: space-between; gap: var(--s-4); }
+.model-card__top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s-4); }
+.model-card__top > div:first-child { flex: 1; min-width: 0; }
 .model-card__name { font-weight: var(--fw-semibold); display: flex; align-items: center; gap: var(--s-2); }
-.model-card__desc { color: var(--text-2); font-size: var(--fs-sm); margin-top: 2px; max-width: 42ch; }
+.model-card__desc { color: var(--text-2); font-size: var(--fs-sm); margin-top: 2px; }
+/* Built-in rules = the always-on detection floor: a slim baseline strip, NOT a
+   selectable model card (rules aren't a model; this distinguishes baseline from catalog). */
+.baseline { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-2) var(--s-4);
+  background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--success);
+  border-radius: var(--r-md); font-size: var(--fs-sm); color: var(--text-2); }
+.baseline__on { color: var(--success); font-weight: var(--fw-medium); white-space: nowrap; }
+.baseline__txt { min-width: 0; }
+.baseline b { color: var(--text); font-weight: var(--fw-medium); }
+.baseline__tag { margin-left: auto; font-size: var(--fs-xs); color: var(--text-muted); white-space: nowrap; }
+/* Model groups: cards live in lists that JS moves them between on install. */
+.model-list { display: flex; flex-direction: column; gap: var(--s-3); }
+.model-list:empty { display: none; }
 .model-card__foot { display: flex; justify-content: space-between; align-items: center; color: var(--text-muted);
   font-size: var(--fs-xs); border-top: 1px solid var(--border); padding-top: var(--s-3); }
 .pill { font-size: var(--fs-xs); padding: 1px 8px; border-radius: var(--r-full); }
-.pill--active { background: rgba(45,212,191,.15); color: var(--primary); border: 1px solid var(--redacted-ring); }
+.pill--active { background: var(--primary-soft); color: var(--primary); border: 1px solid var(--redacted-ring); }
 .meters { display: flex; flex-direction: column; gap: 5px; min-width: 150px; }
 .meter { display: grid; grid-template-columns: 56px 1fr; align-items: center; gap: var(--s-2); font-size: var(--fs-xs); color: var(--text-muted); }
 .meter .track { height: 6px; background: var(--surface-3); border-radius: var(--r-full); overflow: hidden; }
@@ -126,6 +145,9 @@ button, input { font-family: inherit; }
 .hist-item__name { font-weight: var(--fw-medium); }
 .hist-item__meta { color: var(--text-2); font-size: var(--fs-sm); margin-top: 2px; }
 .hist-item__date { color: var(--text-muted); font-size: var(--fs-xs); }
+.hist-item--open { cursor: pointer; transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease); }
+.hist-item--open:hover { border-color: var(--border-strong); background: var(--surface-2); }
+.hist-item__open { color: var(--primary); }
 .note { background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--primary);
   border-radius: var(--r-md); padding: var(--s-3) var(--s-4); color: var(--text-2); font-size: var(--fs-sm); }
 
@@ -137,9 +159,27 @@ button, input { font-family: inherit; }
 /* ===== Status bar ===== */
 .statusbar { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
   padding: var(--s-2) var(--s-4); border-top: 1px solid var(--border); background: var(--surface); font-size: var(--fs-xs); color: var(--text-muted); }
-.statusbar .model { display: inline-flex; align-items: center; gap: var(--s-2); padding: var(--s-1) var(--s-3); border: 1px solid var(--border); border-radius: var(--r-md); color: var(--text-2); cursor: pointer; }
+.statusbar .model { display: inline-flex; align-items: center; gap: var(--s-2); padding: var(--s-1) var(--s-3); border: 1px solid var(--border); border-radius: var(--r-md); color: var(--text-2); cursor: pointer; position: relative; }
 .statusbar .model:hover { color: var(--text); border-color: var(--border-strong); }
-.statusbar .model .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
+.statusbar .model .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+.statusbar .model .caret { font-size: 10px; opacity: .6; }
+
+/* Active-model switcher: opens upward from the statusbar chip (Handy-style). */
+.model-menu { position: absolute; bottom: calc(100% + 8px); left: 0; min-width: 260px; width: max-content; max-width: calc(100vw - 16px); z-index: 50; cursor: default;
+  background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  box-shadow: var(--shadow-2); padding: var(--s-1); display: flex; flex-direction: column; gap: 2px; }
+.model-menu[hidden] { display: none; }
+.model-menu__item { display: flex; align-items: center; gap: var(--s-3); width: 100%; text-align: left;
+  background: transparent; border: 0; border-radius: var(--r-sm); padding: var(--s-2) var(--s-3); cursor: pointer; }
+.model-menu__item:hover, .model-menu__item.is-active { background: var(--surface-3); }
+.model-menu__text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.model-menu__name { color: var(--text); font-weight: var(--fw-medium); font-size: var(--fs-sm); }
+.model-menu__desc { color: var(--text-muted); font-size: var(--fs-xs); }
+.model-menu__badge { color: var(--primary); font-size: var(--fs-xs); font-weight: var(--fw-medium); white-space: nowrap; flex-shrink: 0; }
+
+/* The one active model gets a ring + badge in the Detection list. */
+.model-card--active { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.active-badge { margin-left: var(--s-2); }
 .statusbar .right { display: inline-flex; align-items: center; gap: var(--s-3); }
 .statusbar .right a { color: var(--text-2); text-decoration: none; cursor: pointer; }
 .statusbar .right a:hover { color: var(--text); }
@@ -148,16 +188,115 @@ button, input { font-family: inherit; }
 .result--filled { display: block; text-align: left; padding: 0; border: 0; }
 .result-head { display: flex; align-items: center; justify-content: space-between; }
 .result-actions { display: flex; gap: var(--s-2); }
-.changelog { display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-sm); margin-bottom: var(--s-2); }
-.changelog .row { display: grid; grid-template-columns: 1fr auto; gap: var(--s-3); padding: var(--s-2) var(--s-3); border-radius: var(--r-sm); }
-.changelog .row:nth-child(odd) { background: var(--surface-2); }
-.changelog .pat { color: var(--text-2); }
-.changelog .pat b { color: var(--text); font-weight: var(--fw-medium); }
-.changelog .repl { font-family: var(--font-mono); color: var(--primary); font-size: var(--fs-xs); white-space: nowrap; }
-.compare { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); }
-@media (max-width: 720px) { .compare { grid-template-columns: 1fr; } }
+/* Summary chips: type breakdown + navigator. Click a chip to scroll to and flash
+   that type's redactions in the output below. Scales to any count in 1–2 lines. */
+.chips { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-2); margin-bottom: var(--s-3); }
+.chip { font-family: inherit; font-size: var(--fs-xs); color: var(--text-2); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: var(--r-full); padding: 3px var(--s-3); white-space: nowrap;
+  cursor: pointer; transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease); }
+.chip:hover { color: var(--text); border-color: var(--border-strong); background: var(--surface-3); }
+.chip--active { color: var(--primary); border-color: var(--primary); }
+.chip__n { color: var(--text-muted); margin-left: 2px; }
+.chip--active .chip__n { color: var(--primary); }
+
+/* Flash pulse when a chip targets its redactions (works on teal or amber marks). */
+@keyframes flashMark {
+  0%   { box-shadow: 0 0 0 0 transparent; }
+  45%  { box-shadow: 0 0 0 3px var(--redacted-ring), 0 0 10px 2px var(--redacted-ring); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.pane__body.output mark.repl.flash { animation: flashMark .6s var(--ease) 2; }
+
+/* Redacted output: THE deliverable. Fills the remaining height and is the only
+   thing that scrolls, and only when the document itself is long. */
+.pane--output { display: flex; flex-direction: column; min-height: 0; }
+.pane__body.output { max-height: none; flex: 1; min-height: 0; color: var(--text); line-height: 1.6; }
+.pane__body.output mark.repl { cursor: help; }
+/* "Reveal originals": amber = your real data, NOT safe to share. */
+.pane--output.revealed { border-color: var(--warning); }
+.pane--output.revealed .pane__head { color: var(--warning); }
+.pane--output.revealed mark.repl { background: rgba(251,191,36,.16); color: var(--warning); border-color: rgba(251,191,36,.5); }
 .pane { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
 .pane__head { padding: var(--s-2) var(--s-3); font-size: var(--fs-xs); color: var(--text-muted); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .06em; }
-.pane__body { padding: var(--s-3); font-family: var(--font-mono); font-size: var(--fs-xs); white-space: pre-wrap; word-break: break-word; color: var(--text-2); max-height: 240px; overflow: auto; }
+.pane__body { padding: var(--s-3); font-family: var(--font-mono); font-size: var(--fs-xs); white-space: pre-wrap; word-break: break-word; color: var(--text-2); max-height: 168px; overflow: auto; }
 mark.repl { background: var(--redacted); color: var(--primary); border: 1px solid var(--redacted-ring); border-radius: 4px; padding: 0 3px; }
 mark.bar { background: var(--redacted-bar); color: transparent; border-radius: 3px; padding: 0 3px; }
+
+/* ===== Post-redaction "review & export" state =====
+   On a successful redaction the screen flips compact: the intro pitch + the input
+   config collapse to a slim context bar, and the redacted OUTPUT grows to fill the
+   window. Nothing in the chrome scrolls; only the output body scrolls, and only
+   when the document itself is long. JS adds `.redacted` to the screen. */
+.screen.redacted .screen-head,
+.screen.redacted .dropzone,
+.screen.redacted .options,
+.screen.redacted > .btn--block { display: none; }
+.screen.redacted { height: 100%; }
+.screen.redacted .result--filled { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: stretch; }
+.screen.redacted .pane--output { flex: 1; }
+
+.inputbar { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-2) var(--s-3);
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md);
+  font-size: var(--fs-sm); margin-bottom: var(--s-3); }
+.inputbar__file { font-weight: var(--fw-medium); color: var(--text); min-width: 0; }
+.inputbar__meta { color: var(--text-2); white-space: nowrap; }
+.inputbar .linkbtn { color: var(--primary); flex-shrink: 0; }
+.inputbar .linkbtn:first-of-type { margin-left: auto; }
+.inputbar .linkbtn:hover { color: var(--primary-hover); }
+
+.result--filled .result-head { margin-bottom: var(--s-2); }
+
+/* ===== Redacting progress (A2 — fill + live shimmer) =====
+   When a smart model is running, the Redact button becomes a progress indicator: a
+   fill that advances per detection pass, plus a shimmer band. The shimmer animates a
+   `transform` (composited), so it keeps moving even while model inference blocks the
+   main thread — the button never looks frozen. Engaged only for model runs. */
+.btn--block.redacting { position: relative; overflow: hidden; cursor: progress; }
+.btn--block.redacting:disabled { opacity: 1; }                /* stay vivid though disabled */
+.btn--block.redacting .btn__label { position: relative; z-index: 2; }
+.btn--block.redacting .btn__bar {
+  position: absolute; inset: 0;
+  transform-origin: left center;
+  transform: scaleX(var(--progress, 0.04));   /* unitless 0..1 fraction set from JS */
+  background: rgba(255, 255, 255, .20);
+  /* transform (not width): the transition runs on the compositor, so the fill keeps
+     gliding to its new value even while model inference blocks the main thread */
+  transition: transform var(--dur-fill) var(--ease);
+  will-change: transform;
+  z-index: 0;
+}
+.btn--block.redacting .btn__shimmer {
+  position: absolute; top: 0; bottom: 0; left: 0; width: 38%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .34), transparent);
+  transform: translateX(-130%);
+  will-change: transform;  /* own compositor layer from the first paint, so it keeps moving while wasm blocks */
+  animation: redactShimmer var(--dur-shimmer) var(--ease-shimmer) infinite;
+  z-index: 1; pointer-events: none;
+}
+@keyframes redactShimmer { to { transform: translateX(360%); } }
+
+/* The finished result eases in rather than snapping over the progress state. */
+.result--filled { animation: resultIn var(--dur) var(--ease); }
+@keyframes resultIn { from { opacity: 0; transform: translateY(4px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn--block.redacting .btn__shimmer { animation: none; }
+  .btn--block.redacting .btn__bar { transition: none; }
+  .result--filled { animation: none; }
+  .tooltip { transition: none; }
+}
+
+/* ===== Tooltip (info ⓘ) =====
+   One shared floating panel, replacing native title= bubbles: instant on hover/focus,
+   click pins it, Esc/click-away closes. Same family as the statusbar model-menu. */
+.tooltip { position: fixed; z-index: 50; width: max-content; max-width: calc(100vw - 16px); padding: var(--s-2) var(--s-3);
+  background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  box-shadow: var(--shadow-2); color: var(--text-2); font-size: var(--fs-sm); line-height: var(--lh);
+  opacity: 0; transform: translateY(2px);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+  pointer-events: none; }
+.tooltip.show { opacity: 1; transform: none; }
+.tooltip[hidden] { display: none; }
+.tooltip__row + .tooltip__row { margin-top: var(--s-1); }
+.tooltip b { color: var(--text); font-weight: var(--fw-semibold); }
+.tooltip .tooltip__keeps { color: var(--primary); }  /* "keeps X" is the product promise — say it in teal */
