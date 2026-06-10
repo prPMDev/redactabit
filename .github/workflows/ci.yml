@@ -1,0 +1,28 @@
+# Minimal CI: both engines' test suites + the TS typecheck on every push/PR.
+# No release automation yet — releases are cut manually (see the release checklist).
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx vitest run
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pytest
+      # redacto.py's engine is stdlib-only (gradio imports are lazy), so no extra deps.
+      - run: python -m pytest tests/ -q
