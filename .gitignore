@@ -33,10 +33,12 @@ docs/
 node_modules/
 /target/
 src-tauri/target/
-package-lock.json
 
 # Vite build output
 ui/dist/
+
+# Local ONNX-runtime WASM (copied for an offline experiment; runtime loads from CDN for now)
+ui/public/ort/
 
 # Local preview/launch config
 .claude/launch.json

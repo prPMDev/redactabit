@@ -1,17 +1,26 @@
 {
   "name": "redacto",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Redacto — local, offline document redaction. Nothing leaves your machine.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",
     "typescript": "^6.0.3",
-    "vite": "^8.0.15"
+    "vite": "^8.0.15",
+    "vitest": "^4.1.8"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
+    "@tauri-apps/api": "^2.11.0",
+    "@tauri-apps/plugin-opener": "^2.5.4",
+    "onnxruntime-web": "^1.26.0-dev.20260416-b7804b056c",
+    "pdfjs-dist": "^6.0.227"
   }
 }
