@@ -283,28 +283,48 @@ export class GLiNERDetector implements Detector {
   }
 }
 
-/** Fetch the ONNX weights: the local bundle first (instant + offline), else HF (browser-cached after). */
+/** Fetch the ONNX weights: local bundle, else the Cache API copy, else HF — then PERSIST the
+ *  download in the Cache API so a restart never re-pulls ~200 MB from throttled HF. */
+const MODEL_CACHE = "redacto-models-v1";
+
 async function fetchModel(src: GlinerModelSource, onProgress?: (p: unknown) => void): Promise<Uint8Array> {
   if (src.localFile) {
     try {
       const local = await fetch(src.localFile);
       if (local.ok) return new Uint8Array(await local.arrayBuffer());
-    } catch { /* not bundled — fall through to the HF download */ }
+    } catch { /* not bundled — fall through */ }
   }
-  const r = await fetch(`https://huggingface.co/${src.repo}/resolve/main/${src.file}`);
+  const url = `https://huggingface.co/${src.repo}/resolve/main/${src.file}`;
+  // Downloaded before? Serve from persistent cache storage (instant + offline).
+  try {
+    if (typeof caches !== "undefined") {
+      const hit = await (await caches.open(MODEL_CACHE)).match(url);
+      if (hit) return new Uint8Array(await hit.arrayBuffer());
+    }
+  } catch { /* cache unavailable (insecure context etc.) — plain download below */ }
+
+  const r = await fetch(url);
   if (!r.ok) throw new Error(`GLiNER model download failed: ${r.status} for ${src.file}`);
   const total = Number(r.headers.get("content-length"));
-  if (!r.body || !total) return new Uint8Array(await r.arrayBuffer());
-  // Stream into a single preallocated buffer (no chunk list + reassembly — the model is ~175 MB,
-  // double-buffering would spike peak memory by the same amount again).
-  const buf = new Uint8Array(total);
-  const reader = r.body.getReader();
-  let loaded = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf.set(value, loaded); loaded += value.length;
-    onProgress?.({ status: "progress", progress: (loaded / total) * 100, file: src.file });
+  let buf: Uint8Array;
+  if (!r.body || !total) {
+    buf = new Uint8Array(await r.arrayBuffer());
+  } else {
+    // Stream into a single preallocated buffer (no chunk list + reassembly — the model is ~200 MB,
+    // double-buffering would spike peak memory by the same amount again).
+    buf = new Uint8Array(total);
+    const reader = r.body.getReader();
+    let loaded = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf.set(value, loaded); loaded += value.length;
+      onProgress?.({ status: "progress", progress: (loaded / total) * 100, file: src.file });
+    }
   }
+  try {
+    if (typeof caches !== "undefined")
+      await (await caches.open(MODEL_CACHE)).put(url, new Response(buf.slice().buffer, { headers: { "Content-Type": "application/octet-stream" } }));
+  } catch (e) { diag.warn("model_cache_put_failed", { file: src.file, quota: String((e as Error)?.name) }); }
   return buf;
 }
