@@ -10,9 +10,19 @@ site/
 ├── styles.css      # tokens (from the app) + layout
 ├── app.js          # ~20 lines: relabel the download button to the visitor's OS (local, no network)
 ├── favicon.svg     # the redaction-bar mark
+├── models.json     # DATA, not marketing — the app's model catalog (see below); don't restyle/delete
 ├── .nojekyll       # serve files as-is (skip Jekyll)
 └── README.md       # this file
 ```
+
+## `models.json` — the app's model catalog (not part of the page)
+
+`models.json` lives here only because GitHub Pages serves it for free at
+`https://prpmdev.github.io/frisket/models.json`. The **desktop app** fetches it at runtime to learn
+which detection models exist and where to download their weights — editing it updates installed apps
+**without a new app release** ("update the URL, not the release"). It is a data file, not landing-page
+content: leave it out of any restyle, and don't delete or rename it. The schema + rationale live in
+the repo's `DECISIONS.md` ("model catalog is DATA") and `ui/src/catalog.ts`.
 
 ## Preview locally
 
