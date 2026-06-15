@@ -1,11 +1,14 @@
 {
-  "name": "redacto",
+  "name": "frisket",
   "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Redacto — local, offline document redaction. Nothing leaves your machine.",
+  "description": "Frisket — local, offline document redaction. Nothing leaves your machine.",
   "scripts": {
+    "sync-seed": "node scripts/sync-seed.mjs",
+    "predev": "node scripts/sync-seed.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/sync-seed.mjs",
     "build": "vite build",
     "tauri": "tauri",
     "test": "vitest run"

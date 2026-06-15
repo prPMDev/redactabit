@@ -78,7 +78,7 @@ export const TIPS: Record<string, string> = {
   seed: "Picks which fake values you get. Same set, same fakes, every run. It's not a password and can't un-redact anything.",
   saveTo: "Where your redacted files are saved.",
   clearHistory: "Clears the local history log. Your original files were never saved.",
-  source: "Redacto is open source (MIT).",
+  source: "Frisket is open source (MIT).",
   support: "No donations. A star or a share helps.",
   diagnostics: "A privacy-safe event log: never your document, the matches, or file names. Copy it to report an issue.",
 };

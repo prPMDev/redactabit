@@ -1,6 +1,6 @@
 import { redactAsync, Faker, LEVELS, MODES, DEFAULT_LEVEL, DEFAULT_MODE, type Mode, type Change, type RedactPhase } from "./engine";
 import { COPY, TIPS } from "./strings";
-import { MODELS, BUILTIN, getModel, isInstalled, installedModels, type ModelDef } from "./models";
+import { getModels, getBuiltin, getModel, isInstalled, installedModels, subscribe, initCatalog, type ModelDef } from "./catalog";
 import { handlerFor, fileAccept, fileHint } from "./files";
 import * as diag from "./diag";
 
@@ -8,7 +8,7 @@ import * as diag from "./diag";
 // Links and blob-downloads don't behave like a browser in WebView2, so URLs/folders go
 // through the Tauri opener plugin and diagnostics copy to the clipboard. Everything is
 // dynamically imported with a fallback so the plain browser build (npm run dev) still works.
-const REPO_URL = "https://github.com/prPMDev/redacto";
+const REPO_URL = "https://github.com/prPMDev/frisket";
 
 // Version spans (About + statusbar) fill from the single source (package.json via Vite define).
 document.querySelectorAll<HTMLElement>("[data-version]").forEach((el) => { el.textContent = `v${__APP_VERSION__}`; });
@@ -182,7 +182,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") hideTip(tr
 
 // ───────── preferences: remember last-used level/mode + fake-data set ─────────
 // (one source of truth: the Redact screen; Advanced no longer duplicates these)
-const PREF_KEY = "redacto.prefs.v1";
+const PREF_KEY = "frisket.prefs.v1";
 const seedInput = document.querySelector<HTMLInputElement>("#seedInput");
 function setSegmentedValue(group: HTMLElement, label: string) {
   group.querySelectorAll<HTMLButtonElement>("button").forEach((b) =>
@@ -190,7 +190,7 @@ function setSegmentedValue(group: HTMLElement, label: string) {
 }
 function savePrefs() {
   localStorage.setItem(PREF_KEY, JSON.stringify({
-    level: activeLabel(levelGroup), mode: activeLabel(modeGroup), seed: seedInput?.value || "redacto",
+    level: activeLabel(levelGroup), mode: activeLabel(modeGroup), seed: seedInput?.value || "frisket",
   }));
 }
 (function loadPrefs() {
@@ -336,7 +336,7 @@ redactBtn.addEventListener("click", async () => {
       }
     : undefined;
   try {
-    const { text, changes } = await redactAsync(currentText, level, mode, custom, new Faker(seedInput?.value || "redacto"), extra, onProgress);
+    const { text, changes } = await redactAsync(currentText, level, mode, custom, new Faker(seedInput?.value || "frisket"), extra, onProgress);
     if (showProgress) {                                             // let the narration + fill finish on screen
       setRedactProgress(1);
       while (phaseDraining) await new Promise((r) => setTimeout(r, 60));
@@ -367,20 +367,20 @@ const dListAvail = document.querySelector<HTMLElement>('[data-list="available"]'
 // The always-on floor (built-in rules), shown as the baseline strip — text from the registry.
 const baseTxt = document.querySelector<HTMLElement>(".baseline__txt");
 const baseTag = document.querySelector<HTMLElement>(".baseline__tag");
-if (baseTxt) baseTxt.textContent = BUILTIN.card.desc;
-if (baseTag) baseTag.textContent = BUILTIN.card.size;
+if (baseTxt) baseTxt.textContent = getBuiltin().card.desc;
+if (baseTag) baseTag.textContent = getBuiltin().card.size;
 
 // One smart model is active at a time (Handy-style); built-in rules are always the floor.
-// Stored in "redacto.detect.active" (a model id, or BUILTIN.id for rules-only).
+// Stored in "frisket.detect.active" (a model id, or BUILTIN.id for rules-only).
 function activeModel(): string {
-  const a = localStorage.getItem("redacto.detect.active");
-  if (a === BUILTIN.id) return BUILTIN.id;
+  const a = localStorage.getItem("frisket.detect.active");
+  if (a === getBuiltin().id) return getBuiltin().id;
   const def = a ? getModel(a) : undefined;
   if (def && isInstalled(def)) return def.id;
-  return installedModels()[0]?.id ?? BUILTIN.id; // default: the installed model, else rules-only
+  return installedModels()[0]?.id ?? getBuiltin().id; // default: the installed model, else rules-only
 }
 function setActiveModel(id: string) {
-  localStorage.setItem("redacto.detect.active", id);
+  localStorage.setItem("frisket.detect.active", id);
   renderModelChip();
   placeModelCards();
 }
@@ -414,7 +414,7 @@ function placeModelCards() {
   placingModels = true;
   const active = activeModel();
   const ready: string[] = [], avail: string[] = [];
-  for (const m of MODELS) {
+  for (const m of getModels()) {
     const inst = isInstalled(m);
     (inst ? ready : avail).push(modelCardHtml(m, inst, inst && m.id === active));
   }
@@ -429,10 +429,10 @@ function placeModelCards() {
 function renderModelChip() {
   if (!statusModel) return;
   const active = activeModel();
-  const label = (getModel(active) ?? BUILTIN).chip.label;
+  const label = (getModel(active) ?? getBuiltin()).chip.label;
   const row = (m: ModelDef) => {
     const on = active === m.id;
-    const installed = m.id === BUILTIN.id || isInstalled(m);
+    const installed = m.id === getBuiltin().id || isInstalled(m);
     const right = on ? `<span class="model-menu__badge">Active</span>`
       : installed ? `` : `<span class="model-menu__badge model-menu__badge--dl">${COPY.dlBadge}</span>`;
     return `<button type="button" class="model-menu__item${on ? " is-active" : ""}" data-model="${m.id}"${installed ? "" : ' data-dl="1"'}>`
@@ -442,7 +442,7 @@ function renderModelChip() {
   statusModel.innerHTML =
     `<span class="dot"></span><span class="model__label">${escapeHtml(label)}</span><span class="caret">▴</span>`
     + `<div class="model-menu" hidden>`
-    + [BUILTIN, ...MODELS.filter((m) => m.available)].map(row).join("")
+    + [getBuiltin(), ...getModels().filter((m) => m.available)].map(row).join("")
     + `</div>`;
 }
 
@@ -507,6 +507,12 @@ document.addEventListener("click", (e) => {              // click outside → cl
   }
 });
 renderModelChip();
+
+// The catalog is seeded synchronously above (offline-safe). Refresh it from the remote manifest in
+// the background; if it changed, re-render the cards + chip. Best-effort and fail-silent, so the
+// airplane-mode guarantee holds (an inbound definition pull, never outbound user data).
+subscribe(() => { placeModelCards(); renderModelChip(); });
+initCatalog();
 
 // ───────── render ─────────
 function escapeHtml(s: string): string {
@@ -635,7 +641,7 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
 }
 
 // ───────── run log (privacy-safe: metadata + counts ONLY, never the PII) ─────────
-const LOG_KEY = "redacto.runs.v1";
+const LOG_KEY = "frisket.runs.v1";
 interface RunRecord { ts: string; file: string; chars: number; level: number; mode: Mode; total: number; byType: Record<string, number>; redacted?: string; }
 
 function readLog(): RunRecord[] {
@@ -724,7 +730,7 @@ document.querySelector<HTMLButtonElement>("#exportLog")?.addEventListener("click
   const blob = new Blob([JSON.stringify(readLog(), null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "redacto-log.json";
+  a.download = "frisket-log.json";
   a.click();
   URL.revokeObjectURL(a.href);
 });

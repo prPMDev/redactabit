@@ -1,10 +1,10 @@
 [package]
-name = "redacto"
+name = "frisket"
 version = "0.2.0"
-description = "Redacto — local, offline document redaction. Nothing leaves your machine."
+description = "Frisket — local, offline document redaction. Nothing leaves your machine."
 authors = ["prPMDev"]
 license = "MIT"
-repository = "https://github.com/prPMDev/redacto"
+repository = "https://github.com/prPMDev/frisket"
 edition = "2021"
 rust-version = "1.77.2"
 

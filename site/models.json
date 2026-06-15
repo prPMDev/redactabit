@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "models": [
+    {
+      "id": "gliner-pii",
+      "available": true,
+      "source": {
+        "repo": "knowledgator/gliner-pii-base-v1.0",
+        "file": "onnx/model_quint8.onnx",
+        "threshold": 0.25,
+        "labels": [
+          { "name": "name", "fake": "name", "tag": "[NAME REDACTED]", "sweep": true },
+          { "name": "first name", "fake": "name", "tag": "[NAME REDACTED]", "sweep": true },
+          { "name": "last name", "fake": "name", "tag": "[NAME REDACTED]", "sweep": true },
+          { "name": "location address", "fake": "street", "tag": "[ADDRESS REDACTED]" },
+          { "name": "location street", "fake": "street", "tag": "[ADDRESS REDACTED]" },
+          { "name": "location city", "fake": "cityline", "tag": "[ADDRESS REDACTED]" },
+          { "name": "dob", "fake": "dob", "tag": "[DOB REDACTED]" },
+          { "name": "account number", "fake": "account", "tag": "[ACCOUNT REDACTED]" },
+          { "name": "bank account", "fake": "account", "tag": "[ACCOUNT REDACTED]" },
+          { "name": "credit card", "fake": "card", "tag": "[CARD REDACTED]" },
+          { "name": "passport number", "fake": "passport", "tag": "[PASSPORT REDACTED]" },
+          { "name": "driver license", "tag": "[DRIVER LICENSE REDACTED]" },
+          { "name": "username", "tag": "[USERNAME REDACTED]" }
+        ]
+      },
+      "chip": { "label": "GLiNER PII base", "desc": "Trained to find personal data: names, addresses, IDs." },
+      "card": {
+        "name": "GLiNER PII base",
+        "desc": "Trained specifically on personal data: names, addresses, accounts, IDs. Runs on your machine.",
+        "size": "~197 MB · downloads once",
+        "accuracy": 93,
+        "speed": 62
+      }
+    },
+    {
+      "id": "gliner-multi-pii",
+      "available": true,
+      "source": {
+        "repo": "onnx-community/gliner_multi_pii-v1",
+        "file": "onnx/model_int8.onnx",
+        "threshold": 0.1,
+        "maxWords": 340,
+        "labels": [
+          { "name": "person", "fake": "name", "tag": "[NAME REDACTED]", "sweep": true },
+          { "name": "address", "fake": "street", "tag": "[ADDRESS REDACTED]" },
+          { "name": "date of birth", "fake": "dob", "tag": "[DOB REDACTED]" },
+          { "name": "email", "fake": "email", "tag": "[EMAIL REDACTED]" },
+          { "name": "social security number", "fake": "ssn", "tag": "[SSN REDACTED]" },
+          { "name": "bank account number", "fake": "account", "tag": "[ACCOUNT REDACTED]" },
+          { "name": "credit card number", "fake": "card", "tag": "[CARD REDACTED]" },
+          { "name": "iban", "tag": "[IBAN REDACTED]" }
+        ]
+      },
+      "chip": { "label": "GLiNER multi PII", "desc": "For documents in French, German, Spanish, Italian, Portuguese." },
+      "card": {
+        "name": "GLiNER multi PII",
+        "desc": "For non-English documents: French, German, Spanish, Italian, Portuguese. Runs on your machine.",
+        "size": "~349 MB · downloads once",
+        "accuracy": 86,
+        "speed": 50
+      }
+    }
+  ]
+}
