@@ -1,10 +1,10 @@
-# 🔒 Redacto
+# 🔒 Frisket
 
 **Local, offline document redaction with realistic fake data.**
 
 Strip SSNs, bank accounts, and sensitive PII from PDFs and text files — replacing them with realistic fake data that keeps documents readable. Everything runs on your machine. Nothing is sent anywhere.
 
-<!-- ![Redacto Screenshot](screenshot.png) -->
+<!-- ![Frisket Screenshot](screenshot.png) -->
 <!-- TODO: Add screenshot after first run -->
 
 ## Why
@@ -13,7 +13,7 @@ You need to share a tax return with your accountant, upload a financial document
 
 Online redaction tools defeat the purpose — you're uploading sensitive documents to a stranger's server. `[REDACTED]` tags break document readability. Manual redaction misses things.
 
-Redacto replaces sensitive data with **realistic fakes** so your documents remain structurally intact and useful, while your identity stays private.
+Frisket replaces sensitive data with **realistic fakes** so your documents remain structurally intact and useful, while your identity stays private.
 
 ## Quick Start
 
@@ -22,7 +22,7 @@ Redacto replaces sensitive data with **realistic fakes** so your documents remai
 pip install gradio pypdf reportlab
 
 # Run
-python redacto.py
+python frisket.py
 
 # Open http://localhost:7860
 ```
@@ -31,7 +31,7 @@ Or install as a package:
 
 ```bash
 pip install .
-redacto
+frisket
 ```
 
 ## How It Works
@@ -73,8 +73,8 @@ Custom terms (names, addresses, employers) are always redacted regardless of lev
 ### Setup
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/redacto.git
-cd redacto
+git clone https://github.com/YOUR_USERNAME/frisket.git
+cd frisket
 pip install -e ".[dev]"
 ```
 
@@ -85,7 +85,7 @@ pip install -e ".[dev]"
 pytest
 
 # With coverage
-pytest --cov=redacto --cov-report=term-missing
+pytest --cov=frisket --cov-report=term-missing
 
 # Specific test class
 pytest tests/test_engine.py::TestPatternPositive -v
@@ -109,8 +109,8 @@ pytest tests/test_engine.py::TestPatternPositive -v
 ### Project Structure
 
 ```
-redacto/
-├── redacto.py          # Everything — engine, patterns, faker, UI
+frisket/
+├── frisket.py          # Everything — engine, patterns, faker, UI
 ├── pyproject.toml        # Package config, dependencies, scripts
 ├── README.md             # This file
 ├── PRD.md                # Product requirements document

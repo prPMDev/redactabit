@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Redacto",
+  "productName": "Frisket",
   "version": "0.2.0",
-  "identifier": "com.redacto.app",
+  "identifier": "com.frisket.app",
   "build": {
     "frontendDist": "../ui/dist",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Redacto",
+        "title": "Frisket",
         "width": 1000,
         "height": 720,
         "minWidth": 880,
@@ -23,7 +23,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; worker-src 'self' blob:; connect-src 'self' ws: https://huggingface.co https://*.huggingface.co https://*.hf.co https://cdn.jsdelivr.net"
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; worker-src 'self' blob:; connect-src 'self' ws: https://huggingface.co https://*.huggingface.co https://*.hf.co https://cdn.jsdelivr.net https://prpmdev.github.io"
     }
   },
   "bundle": {

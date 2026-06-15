@@ -1,6 +1,6 @@
-/* Redacto — landing page styles.
+/* Frisket — landing page styles.
    Color/space tokens are lifted verbatim from the app (ui/styles/tokens.css) so the
-   site matches Redacto: dark, teal accent, system fonts. Font SIZES are web-scaled
+   site matches Frisket: dark, teal accent, system fonts. Font SIZES are web-scaled
    (the app's px scale tops out at 28px — too small for a hero).
    Self-hosted only: system fonts, no CDN, no web fonts, no third-party anything. */
 

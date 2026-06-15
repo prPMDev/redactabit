@@ -1,4 +1,4 @@
-/* Redacto landing — the only JS on the page.
+/* Frisket landing — the only JS on the page.
  * Progressive enhancement: relabel the primary download button to the visitor's OS.
  * Pure local navigator sniffing — no network, no third parties. The page is fully
  * functional (and defaults to Windows) with JS disabled.

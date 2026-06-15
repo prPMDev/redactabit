@@ -1,5 +1,5 @@
 // Safety net for the TS engine. The 167 tests in tests/test_engine.py cover the
-// Python engine (redacto.py), NOT this port — so this guards the Detector refactor.
+// Python engine (frisket.py), NOT this port — so this guards the Detector refactor.
 // Fake VALUES differ from Python (different PRNG), so we assert detection + behavior,
 // never exact fake strings.
 import { describe, it, expect } from "vitest";

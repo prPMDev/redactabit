@@ -1,6 +1,6 @@
-# Redacto — landing page (`site/`)
+# Frisket — landing page (`site/`)
 
-The marketing page for Redacto, hosted on GitHub Pages. One static page, no build step, no
+The marketing page for Frisket, hosted on GitHub Pages. One static page, no build step, no
 framework. **Zero analytics, zero third-party trackers, zero CDN fonts — everything is
 self-hosted.** A privacy tool's own site has to practice what it preaches.
 
@@ -35,7 +35,7 @@ Publishing is handled by [`.github/workflows/pages.yml`](../.github/workflows/pa
 uploads `site/` as the Pages artifact on every push to `main` that touches `site/`.
 
 One-time setup: **repo → Settings → Pages → Build and deployment → Source → "GitHub Actions."**
-After that, pushes auto-publish to `https://prpmdev.github.io/redacto/`.
+After that, pushes auto-publish to `https://prpmdev.github.io/frisket/`.
 
 ### Moving to Cloudflare Pages later
 
@@ -44,7 +44,7 @@ repo, set **build command** empty and **output directory** to `site`. Done.
 
 ## TODOs
 
-- **Download buttons** point at `…/redacto/releases` for now. Once installers are published,
+- **Download buttons** point at `…/frisket/releases` for now. Once installers are published,
   point "Download for Windows" at the direct `.msi`/NSIS asset (or `…/releases/latest`). See the
   `TODO` comment in `index.html`.
 - **Demo clip:** the before → after panel is a static placeholder. Record a short screen capture

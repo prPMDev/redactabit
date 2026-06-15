@@ -24,5 +24,5 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pytest
-      # redacto.py's engine is stdlib-only (gradio imports are lazy), so no extra deps.
+      # frisket.py's engine is stdlib-only (gradio imports are lazy), so no extra deps.
       - run: python -m pytest tests/ -q

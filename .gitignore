@@ -10,8 +10,8 @@ __pycache__/
 venv/
 env/
 
-# Redacto output — may contain real redacted documents
-Redacto_Output/
+# Frisket output — may contain real redacted documents
+Frisket_Output/
 
 # Local test artifacts
 sample_redacted.*

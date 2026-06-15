@@ -1,4 +1,4 @@
-# Redacto — Product Requirements Document
+# Frisket — Product Requirements Document
 
 ## Problem Statement
 
@@ -140,10 +140,10 @@ For an open-source tool, success means:
 
 | Tool | Local? | Fake Data? | Free? | Single File? |
 |------|--------|------------|-------|-------------|
-| **Redacto** | ✅ | ✅ | ✅ | ✅ |
+| **Frisket** | ✅ | ✅ | ✅ | ✅ |
 | Adobe Acrobat Pro | ✅ | ❌ | ❌ ($240/yr) | N/A |
 | Microsoft Presidio | ✅ | ✅ | ✅ | ❌ (heavy) |
 | Online redactors | ❌ | ❌ | Varies | N/A |
 | regex + sed | ✅ | ❌ | ✅ | ✅ but no UI |
 
-Redacto's niche: **lightweight, local, fake-data-first, with a UI that non-developers can use.**
+Frisket's niche: **lightweight, local, fake-data-first, with a UI that non-developers can use.**

@@ -165,8 +165,9 @@ type GlinerSession = { run(feeds: Record<string, unknown>): Promise<Record<strin
 type TensorCtor = new (type: string, data: unknown, dims: number[]) => unknown;
 
 export interface GlinerModelSource {
-  repo: string;        // HF repo id (tokenizer + download fallback)
-  file: string;        // ONNX file within the repo
+  repo: string;        // HF repo id (tokenizer is always resolved from here; weights too unless modelUrl)
+  file: string;        // ONNX file within the repo (used to build the default HF weights URL)
+  modelUrl?: string;   // direct weights URL (Releases/R2/anywhere); absent -> HF-derived from repo+file
   localFile?: string;  // bundled copy served from /public (instant + offline), tried first
   threshold?: number;
   labels: GlinerLabel[]; // the model's prompt labels + redaction mapping (order = class id)
@@ -285,7 +286,7 @@ export class GLiNERDetector implements Detector {
 
 /** Fetch the ONNX weights: local bundle, else the Cache API copy, else HF — then PERSIST the
  *  download in the Cache API so a restart never re-pulls ~200 MB from throttled HF. */
-const MODEL_CACHE = "redacto-models-v1";
+const MODEL_CACHE = "frisket-models-v1";
 
 async function fetchModel(src: GlinerModelSource, onProgress?: (p: unknown) => void): Promise<Uint8Array> {
   if (src.localFile) {
@@ -294,7 +295,8 @@ async function fetchModel(src: GlinerModelSource, onProgress?: (p: unknown) => v
       if (local.ok) return new Uint8Array(await local.arrayBuffer());
     } catch { /* not bundled — fall through */ }
   }
-  const url = `https://huggingface.co/${src.repo}/resolve/main/${src.file}`;
+  // Weights live wherever the manifest says (Releases/R2/own mirror); default is the HF repo file.
+  const url = src.modelUrl ?? `https://huggingface.co/${src.repo}/resolve/main/${src.file}`;
   // Downloaded before? Serve from persistent cache storage (instant + offline).
   try {
     if (typeof caches !== "undefined") {

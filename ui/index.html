@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Redacto</title>
+  <title>Frisket</title>
   <link rel="stylesheet" href="styles/tokens.css" />
   <link rel="stylesheet" href="styles/app.css" />
 </head>
@@ -13,7 +13,7 @@
       <div class="main">
         <!-- Sidebar -->
         <aside class="sidebar">
-          <div class="brand"><span class="bar"></span><span class="name">Redacto</span></div>
+          <div class="brand"><span class="bar"></span><span class="name">Frisket</span></div>
           <nav class="nav">
             <a data-nav="redact" class="active"><span class="ic">▮</span> Redact</a>
             <a data-nav="models"><span class="ic">◫</span> Detection</a>
@@ -59,7 +59,7 @@
 
           <!-- ===== MODELS ===== -->
           <section class="screen" data-screen="models" style="display:none">
-            <div class="screen-head"><h1>Detection</h1><div class="sub">How Redacto finds sensitive data.</div></div>
+            <div class="screen-head"><h1>Detection</h1><div class="sub">How Frisket finds sensitive data.</div></div>
             <div class="baseline">
               <span class="baseline__on">✓ Always on</span>
               <span class="baseline__txt">Finds SSNs, cards, and accounts.</span>
@@ -76,8 +76,8 @@
           <section class="screen" data-screen="advanced" style="display:none">
             <div class="screen-head"><h1>Advanced</h1><div class="sub">Storage and fake data. Everything stays on your machine.</div></div>
             <div class="panel">
-              <div class="setrow"><span class="k">Fake-data set <i class="info" data-tip="seed" tabindex="0" role="button" aria-label="About the fake-data set">i</i></span><span class="v"><input class="input" id="seedInput" value="redacto" readonly style="width:140px" /><button class="btn btn--secondary" id="regenSeed">🎲 Regenerate</button></span></div>
-              <div class="setrow"><span class="k">Save redacted files to <i class="info" data-tip="saveTo" tabindex="0" role="button" aria-label="About the save location">i</i></span><span class="v"><input class="input input--path" value="~/Redacto_Output" readonly /><button class="btn btn--secondary">Open</button></span></div>
+              <div class="setrow"><span class="k">Fake-data set <i class="info" data-tip="seed" tabindex="0" role="button" aria-label="About the fake-data set">i</i></span><span class="v"><input class="input" id="seedInput" value="frisket" readonly style="width:140px" /><button class="btn btn--secondary" id="regenSeed">🎲 Regenerate</button></span></div>
+              <div class="setrow"><span class="k">Save redacted files to <i class="info" data-tip="saveTo" tabindex="0" role="button" aria-label="About the save location">i</i></span><span class="v"><input class="input input--path" value="~/Frisket_Output" readonly /><button class="btn btn--secondary">Open</button></span></div>
               <div class="setrow"><span class="k">Clear saved history <i class="info" data-tip="clearHistory" tabindex="0" role="button" aria-label="About clearing history">i</i></span><span class="v"><button class="btn btn--danger" id="clearAll">Clear history</button></span></div>
             </div>
           </section>
@@ -88,7 +88,7 @@
               <div><h1>History</h1><div class="sub">Your recent redactions. Click one to reopen it.</div></div>
               <button class="btn btn--secondary" id="exportLog">⤓ Export log</button>
             </div>
-            <div class="note">🔒 Saved on your machine only. Redacto keeps the redacted result and basic details, never your original file. Clear it anytime.</div>
+            <div class="note">🔒 Saved on your machine only. Frisket keeps the redacted result and basic details, never your original file. Clear it anytime.</div>
             <div class="hist"></div>
             <button class="linkbtn" id="clearHist" style="align-self:flex-start">Clear history</button>
           </section>
@@ -100,8 +100,8 @@
               <div class="setrow"><span class="k">Version</span><span class="v" data-version></span></div>
               <div class="setrow"><span class="k">Source code <i class="info" data-tip="source" tabindex="0" role="button" aria-label="About the source code">i</i></span><span class="v"><button class="btn btn--secondary" id="githubBtn">View on GitHub</button></span></div>
               <div class="setrow"><span class="k">Support development <i class="info" data-tip="support" tabindex="0" role="button" aria-label="About supporting development">i</i></span><span class="v"><button class="btn btn--secondary" id="starBtn">★ Star</button><button class="btn btn--secondary" id="shareBtn">Share</button></span></div>
-              <div class="setrow"><span class="k">App data directory</span><span class="v"><input class="input input--path" value="~/AppData/Local/com.redacto.app" readonly /><button class="btn btn--secondary" id="openDataBtn">Open</button></span></div>
-              <div class="setrow"><span class="k">Log directory</span><span class="v"><input class="input input--path" value="~/AppData/Local/com.redacto.app/logs" readonly /><button class="btn btn--secondary" id="openLogBtn">Open</button></span></div>
+              <div class="setrow"><span class="k">App data directory</span><span class="v"><input class="input input--path" value="~/AppData/Local/com.frisket.app" readonly /><button class="btn btn--secondary" id="openDataBtn">Open</button></span></div>
+              <div class="setrow"><span class="k">Log directory</span><span class="v"><input class="input input--path" value="~/AppData/Local/com.frisket.app/logs" readonly /><button class="btn btn--secondary" id="openLogBtn">Open</button></span></div>
               <div class="setrow"><span class="k">Diagnostics <i class="info" data-tip="diagnostics" tabindex="0" role="button" aria-label="About diagnostics">i</i></span><span class="v"><button class="btn btn--secondary" id="exportDiag">📋 Copy diagnostics</button></span></div>
             </div>
             <div class="group-h">Acknowledgments</div>
