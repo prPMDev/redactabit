@@ -500,6 +500,14 @@ statusModel?.addEventListener("click", (e) => {
   }
   if (menu) menu.hidden = !menu.hidden;                  // click the chip → toggle the menu
 });
+// Statusbar chip: the same styled tooltip on hover/focus (click is reserved for the menu,
+// so no click-pin here; opening the menu hides the hover tip so they never overlap).
+statusModel?.addEventListener("pointerenter", () => {
+  const menu = statusModel.querySelector<HTMLElement>(".model-menu");
+  if (!tipPinned && (!menu || menu.hidden)) showTip(statusModel);
+});
+statusModel?.addEventListener("pointerleave", () => hideTip());
+statusModel?.addEventListener("click", () => hideTip(true));
 document.addEventListener("click", (e) => {              // click outside → close
   if (statusModel && !statusModel.contains(e.target as Node)) {
     const menu = statusModel.querySelector<HTMLElement>(".model-menu");

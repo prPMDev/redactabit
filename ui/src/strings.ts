@@ -74,6 +74,7 @@ export const COPY = {
 // Static info-tooltip texts, keyed by the icon's data-tip attribute. Level and mode tips
 // are NOT here — they compose from the engine registries at runtime (single source).
 export const TIPS: Record<string, string> = {
+  detection: "The detection method in use. Click to switch it, or open the Detection tab to add models.",
   customTerms: "Your own words to always redact: an employer, a nickname, a project name. Separate with commas.",
   seed: "Picks which fake values you get. Same set, same fakes, every run. It's not a password and can't un-redact anything.",
   saveTo: "Where your redacted files are saved.",
