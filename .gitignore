@@ -28,8 +28,9 @@ Thumbs.db
 # Local-only decision log (kept on disk, never published)
 DECISIONS.md
 
-# Local working docs (design, planning) - never published
-docs/
+# Local working docs (design, planning) - never published. Anchored to the repo root so the
+# public docs site at site/docs/ still tracks.
+/docs/
 node_modules/
 /target/
 src-tauri/target/

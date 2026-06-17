@@ -1,0 +1,69 @@
+/* Frisket docs — layout only. Tokens, the light/dark theme, and the header/nav/footer/
+   theme-toggle all come from ../styles.css; this file just adds the sidebar + prose. */
+
+.docs-layout {
+  width: 100%; max-width: var(--container); margin: 0 auto;
+  padding: var(--s-6) var(--s-5) var(--s-7);
+  display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: var(--s-7); align-items: start;
+}
+
+/* ===== Sidebar (sticky on desktop) ===== */
+.docs-sidebar { position: sticky; top: 76px; }
+.docs-sidebar nav { display: flex; flex-direction: column; gap: 2px; }
+.docs-sidebar a {
+  color: var(--text-2); font-size: .9375rem; padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-md); transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.docs-sidebar a:hover { color: var(--text); background: var(--surface-2); }
+.docs-sidebar a.sub { margin-left: var(--s-3); }
+.docs-sidebar__group {
+  margin: var(--s-4) 0 var(--s-1); padding: 0 var(--s-3);
+  font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted);
+}
+
+/* ===== Content (prose) ===== */
+.docs-content { min-width: 0; max-width: 72ch; }
+.docs-content [id] { scroll-margin-top: 76px; }
+.docs-content > h1 { font-size: clamp(1.9rem, 4vw, 2.4rem); font-weight: 600; letter-spacing: -.02em; }
+.docs-content .lead { color: var(--text-2); font-size: 1.05rem; line-height: 1.6; margin-top: var(--s-3); }
+.docs-content > section { margin-top: var(--s-7); }
+.docs-content h2 { font-size: 1.5rem; font-weight: 600; letter-spacing: -.01em; padding-bottom: var(--s-2); border-bottom: 1px solid var(--border); }
+.docs-content h3 { font-size: 1.125rem; font-weight: 600; margin-top: var(--s-5); }
+.docs-content p { color: var(--text-2); line-height: 1.7; margin-top: var(--s-3); }
+.docs-content a { color: var(--primary); }
+.docs-content a:hover { color: var(--primary-hover); }
+.docs-content ul { margin: var(--s-3) 0 0; padding-left: var(--s-5); display: flex; flex-direction: column; gap: var(--s-2); }
+.docs-content li { color: var(--text-2); line-height: 1.6; }
+.docs-content code {
+  font-family: var(--font-mono); font-size: .85em; color: var(--text);
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: .08em .35em;
+}
+.docs-content pre {
+  margin-top: var(--s-3); background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: var(--s-4); overflow-x: auto;
+}
+.docs-content pre code { background: none; border: 0; padding: 0; font-size: .85rem; color: var(--text-2); line-height: 1.7; }
+
+/* Tables */
+.docs-content table { margin-top: var(--s-4); width: 100%; border-collapse: collapse; font-size: .9375rem; }
+.docs-content th, .docs-content td { text-align: left; padding: var(--s-2) var(--s-3); border-bottom: 1px solid var(--border); vertical-align: top; }
+.docs-content th { color: var(--text); font-weight: 600; border-bottom-color: var(--border-strong); }
+.docs-content td { color: var(--text-2); line-height: 1.55; }
+
+/* Callout */
+.docs-content .note {
+  margin-top: var(--s-4); background: var(--surface-2); border: 1px solid var(--border);
+  border-left: 3px solid var(--primary); border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4); color: var(--text-2); font-size: .9375rem; line-height: 1.6;
+}
+.docs-content .muted { color: var(--text-muted); font-weight: 400; }
+
+/* ===== Responsive: stack the sidebar above the content ===== */
+@media (max-width: 860px) {
+  .docs-layout { grid-template-columns: 1fr; gap: var(--s-5); padding-top: var(--s-5); }
+  .docs-sidebar { position: static; top: auto; padding-bottom: var(--s-4); border-bottom: 1px solid var(--border); }
+  .docs-sidebar nav { flex-direction: row; flex-wrap: wrap; gap: var(--s-1); }
+  .docs-sidebar a.sub { margin-left: 0; }
+  .docs-sidebar__group { width: 100%; margin: var(--s-2) 0 0; }
+  .docs-content { max-width: none; }
+}
