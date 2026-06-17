@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Docs — Frisket</title>
+  <meta name="description" content="How Frisket works: redaction levels, replacement modes, what it detects, the optional local models, and the privacy guarantee." />
+  <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../styles.css?v=4" />
+  <link rel="stylesheet" href="docs.css?v=1" />
+
+  <!-- Apply the saved theme before paint so there's no flash. Toggle lives in ../app.js. -->
+  <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+  <!-- ===== Nav (same chrome as the landing page) ===== -->
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="../" aria-label="Frisket home">
+        <span class="bar" aria-hidden="true"></span>
+        <span class="name">Frisket</span>
+      </a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="../#download">Download</a>
+        <a href="../#how">How it works</a>
+        <a href="./">Docs</a>
+        <a href="https://github.com/prPMDev/frisket">GitHub</a>
+      </nav>
+      <div class="nav__right">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Color theme: System">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <a class="btn btn--secondary btn--sm" href="https://github.com/prPMDev/frisket" aria-label="Star Frisket on GitHub">
+          <span aria-hidden="true">★</span> Star on GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top" class="docs">
+    <div class="docs-layout">
+      <!-- ===== Sidebar ===== -->
+      <aside class="docs-sidebar" aria-label="On this page">
+        <nav>
+          <a href="#getting-started">Getting started</a>
+          <p class="docs-sidebar__group">How it works</p>
+          <a class="sub" href="#levels">Levels</a>
+          <a class="sub" href="#modes">Modes</a>
+          <a class="sub" href="#what-it-detects">What it detects</a>
+          <a class="sub" href="#fake-data">Fake data</a>
+          <a href="#models">Models</a>
+          <a href="#privacy">Privacy</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+      </aside>
+
+      <!-- ===== Content ===== -->
+      <article class="docs-content">
+        <h1>Frisket documentation</h1>
+        <p class="lead">Frisket swaps the personal details in a document for realistic fakes, so the file still reads normally and the numbers still add up. Everything runs on your own machine.</p>
+
+        <section id="getting-started">
+          <h2>Getting started</h2>
+          <p>There are two ways to run Frisket today.</p>
+
+          <h3>Python tool <span class="muted">(works now)</span></h3>
+          <p>The engine runs anywhere Python does, with a browser UI or straight from the command line.</p>
+<pre><code>pip install gradio pymupdf
+python frisket.py                 # opens the UI at http://localhost:7860
+python frisket.py statement.pdf -l 2 -m fake   # or run it headless</code></pre>
+
+          <h3>Desktop app</h3>
+          <p>The one-click desktop app bundles the redactor and the optional models, with no Python needed. Prebuilt installers are coming to the <a href="https://github.com/prPMDev/frisket/releases">Releases page</a>; until then you can build it from source:</p>
+<pre><code>git clone https://github.com/prPMDev/frisket.git
+cd frisket
+npm install &amp;&amp; npm run tauri build   # installers land in src-tauri/target/release/bundle/</code></pre>
+
+          <h3>Your first redaction</h3>
+          <p>Drop in a PDF or text file, choose how much to take out (a <a href="#levels">level</a>) and how to replace it (a <a href="#modes">mode</a>), then download the clean copy. Nothing is uploaded.</p>
+        </section>
+
+        <section id="how-it-works">
+          <h2>How it works</h2>
+          <p>A <strong>level</strong> decides how much Frisket removes; a <strong>mode</strong> decides what the removed values are replaced with.</p>
+
+          <h3 id="levels">Levels</h3>
+          <p>Standard is the default — it removes what identifies you and keeps the figures, so the document still makes sense.</p>
+          <table>
+            <thead><tr><th>Level</th><th>Removes</th><th>Keeps</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Light</strong></td><td>The critical IDs: SSNs, ITINs, bank accounts, routing and card numbers, passport / visa / USCIS numbers</td><td>Names, contact details, amounts, dates, zips</td></tr>
+              <tr><td><strong>Standard</strong> <span class="muted">(default)</span></td><td>Everything in Light, plus names, email, phone, street address, date of birth, EIN</td><td>Dollar amounts, dates, zip codes</td></tr>
+              <tr><td><strong>Heavy</strong></td><td>Everything in Standard, plus dollar amounts and zip codes</td><td>Little beyond non-identifying text</td></tr>
+            </tbody>
+          </table>
+
+          <h3 id="modes">Modes</h3>
+          <ul>
+            <li><strong>Fake</strong> — a realistic stand-in (a different name, a different SSN). Best for AI, because the document still reads naturally.</li>
+            <li><strong>Mask</strong> — only the last few characters show, like <code>XXX-XX-6789</code>. Good for confirming you have the right document.</li>
+            <li><strong>Label</strong> — a plain tag like <code>[SSN REDACTED]</code>. Best for formal or legal sharing.</li>
+          </ul>
+          <p class="note">In the Python command line the third mode is named <code>redact</code> rather than <code>Label</code>.</p>
+
+          <h3 id="what-it-detects">What it detects</h3>
+          <p>Built-in rules catch structured, US-style identifiers:</p>
+          <ul>
+            <li>SSNs, ITINs, and EINs</li>
+            <li>Bank account and routing numbers, credit-card numbers</li>
+            <li>Phone numbers, email addresses, and street addresses</li>
+            <li>Dates of birth; passport, visa, and USCIS numbers; Indian PAN; labeled IDs (Reference&nbsp;#, Envelope&nbsp;#, and the like)</li>
+            <li>At Heavy, also dollar amounts and zip codes</li>
+          </ul>
+          <p>Anything you add as a <strong>custom term</strong> — a name, an employer, a project — is always removed, at every level. For names and addresses that don't follow a fixed format, the optional <a href="#models">models</a> help.</p>
+          <p class="note">The built-in rules are US-centric. Non-US documents are partly covered today; see the multilingual model under <a href="#models">Models</a>.</p>
+
+          <h3 id="fake-data">Fake data</h3>
+          <p>Fake replacements are deterministic: the same input and the same seed produce the same fake every run, so a document stays consistent with itself. Fake SSNs use the 800–899 range, so they're never a real SSN or ITIN, and dollar amounts are kept in proportion, so the numbers still behave for analysis. The seed just picks which set of fakes you get — it isn't a password, and it can't reverse a redaction.</p>
+        </section>
+
+        <section id="models">
+          <h2>Models</h2>
+          <p>Detection has two layers. Built-in rules are always on and need nothing extra. Optional models add machine learning for what rules miss — mainly names and addresses — and they run entirely on your machine.</p>
+
+          <h3>Built-in rules</h3>
+          <p>Always on, 0&nbsp;MB, no download. The pattern matchers above — fast and reliable on structured IDs like SSNs, cards, and account numbers.</p>
+
+          <h3>GLiNER PII base <span class="muted">(default)</span></h3>
+          <p>Trained specifically on personal data: names, addresses, accounts, IDs. About <strong>197&nbsp;MB</strong>, downloaded once, then it works offline.</p>
+
+          <h3>GLiNER multi PII</h3>
+          <p>For non-English documents — French, German, Spanish, Italian, Portuguese. About <strong>349&nbsp;MB</strong>, downloaded once.</p>
+
+          <p class="note">A model downloads from the catalog the first time you pick it, then runs offline. Picking one is optional — the built-in rules work on their own.</p>
+        </section>
+
+        <section id="privacy">
+          <h2>Privacy</h2>
+          <p>Your document stays on your computer. Frisket doesn't upload your file, ask you to sign in, or phone home. The Python UI listens on <code>127.0.0.1</code> only, so nothing else on your network can reach it.</p>
+          <p>The optional models download once, and after that the whole thing runs with the Wi-Fi off — the airplane-mode test. Frisket is MIT-licensed, so you can <a href="https://github.com/prPMDev/frisket">read the code</a> and confirm all of this for yourself.</p>
+        </section>
+
+        <section id="faq">
+          <h2>FAQ</h2>
+
+          <h3>Does it really work offline?</h3>
+          <p>Yes. The redaction engine needs no network at all. The optional models download once; after that you can pull the plug and Frisket still works.</p>
+
+          <h3>Does it read scanned documents?</h3>
+          <p>Not yet. Frisket needs a real text layer, so a scanned PDF with no embedded text won't work. OCR is on the list.</p>
+
+          <h3>Which files can I use?</h3>
+          <p>PDF, and text files: <code>.txt</code>, <code>.csv</code>, <code>.md</code>, <code>.json</code>, <code>.xml</code>, <code>.html</code>.</p>
+
+          <h3>Is any of my data uploaded?</h3>
+          <p>No. Nothing about your document leaves your machine.</p>
+
+          <h3>What about non-US documents?</h3>
+          <p>The built-in rules are US-centric. The multilingual model helps with French, German, Spanish, Italian, and Portuguese; broader coverage is planned.</p>
+
+          <h3>Can the fake data be reversed?</h3>
+          <p>No. The seed only selects which fakes you get — it isn't a key, and it can't restore the original values.</p>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <!-- ===== Footer (same as the landing page) ===== -->
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <div class="footer-links">
+        <span>Built by <a href="https://github.com/prPMDev">prPMDev</a></span>
+        <span class="sep" aria-hidden="true">·</span>
+        <a href="https://github.com/prPMDev/frisket/blob/main/LICENSE">MIT License</a>
+        <span class="sep" aria-hidden="true">·</span>
+        <a href="https://github.com/prPMDev/frisket">GitHub</a>
+      </div>
+      <p class="footer-creed"><b>No analytics. No trackers. No CDNs.</b> This page is as private as the app.</p>
+    </div>
+  </footer>
+
+  <script src="../app.js?v=2" defer></script>
+</body>
+</html>
