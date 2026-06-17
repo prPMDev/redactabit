@@ -78,11 +78,18 @@ async function revealSaveTarget() {
     await revealItemInDir(dir);
   } catch (e) { diag.error("reveal_failed", e); }
 }
-// Shared wiring for the result/history "Save" button: write to the folder, else download.
-function wireSaveButton(btn: HTMLButtonElement, name: string, text: string) {
-  btn.addEventListener("click", async () => {
+// After a successful folder-save, swap Save → Show in folder (sequential — never both at once;
+// "Show in folder" makes no sense until there's a saved file to reveal).
+function markSaved(saveBtn: HTMLButtonElement, showFolderBtn: HTMLButtonElement) {
+  saveBtn.textContent = COPY.saved;
+  setTimeout(() => { saveBtn.style.display = "none"; showFolderBtn.style.display = ""; }, 1000);
+}
+// Shared wiring for the result/history "Save" button: write to the folder (then "Show in folder"
+// takes its place), else download (browser dev, no folder).
+function wireSaveButton(saveBtn: HTMLButtonElement, showFolderBtn: HTMLButtonElement, name: string, text: string) {
+  saveBtn.addEventListener("click", async () => {
     const full = await saveToFolder(name, text);
-    if (full) flash(btn, COPY.saved);
+    if (full) markSaved(saveBtn, showFolderBtn);
     else downloadText(name, text);
   });
 }
@@ -684,7 +691,7 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
         <button class="btn btn--secondary" id="revealBtn" aria-pressed="false">${COPY.reveal}</button>
         <button class="btn btn--secondary" id="copyBtn">${COPY.copyRedacted}</button>
         <button class="btn btn--secondary" id="saveBtn">${COPY.save}</button>
-        <button class="btn btn--secondary" id="showFolderBtn">${COPY.showInFolder}</button>
+        <button class="btn btn--secondary" id="showFolderBtn" style="display:none">${COPY.showInFolder}</button>
       </div>
     </div>
     <div class="chips">${chips}</div>
@@ -748,6 +755,8 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
     catch { flash(btn, COPY.copyFailed); }
   });
   const saveBtn = resultEl.querySelector<HTMLButtonElement>("#saveBtn")!;
+  const showFolderBtn = resultEl.querySelector<HTMLButtonElement>("#showFolderBtn")!;
+  showFolderBtn.addEventListener("click", () => void revealSaveTarget());
   if (currentIsPdf && currentFile) {
     // PDF in → redacted PDF out: truly remove the PII (mupdf) + draw the replacements (pdf-lib),
     // then save bytes. Refuse to save if anything survives re-extraction. Text preview above stays
@@ -761,10 +770,10 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
         const repl = changes.map((c) => ({ original: c.fullOriginal, replacement: c.fullReplaced }));
         const src = new Uint8Array(await pdfFile.arrayBuffer());
         const { bytes, survivors } = await redactPdf(src, repl);
-        saveBtn.textContent = COPY.save; // restore base label before flashing
+        saveBtn.textContent = COPY.save;
         if (survivors.length) { diag.error("pdf_redact_survivors", null, { count: survivors.length }); flash(saveBtn, COPY.pdfLeakError); return; }
         const full = await saveBytesToFolder(name, bytes);
-        if (full) flash(saveBtn, COPY.saved); else downloadBytes(name, bytes);
+        if (full) markSaved(saveBtn, showFolderBtn); else downloadBytes(name, bytes);
       } catch (e) {
         diag.error("pdf_redact_failed", e);
         saveBtn.textContent = COPY.save;
@@ -774,9 +783,8 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
       }
     });
   } else {
-    wireSaveButton(saveBtn, currentName, redacted);
+    wireSaveButton(saveBtn, showFolderBtn, currentName, redacted);
   }
-  resultEl.querySelector<HTMLButtonElement>("#showFolderBtn")!.addEventListener("click", () => void revealSaveTarget());
 }
 
 // ───────── run log (privacy-safe: metadata + counts ONLY, never the PII) ─────────
@@ -822,7 +830,7 @@ function showHistoryItem(rec: RunRecord) {
       <div class="result-actions">
         <button class="btn btn--secondary" id="copyBtn">${COPY.copyRedacted}</button>
         <button class="btn btn--secondary" id="saveBtn">${COPY.save}</button>
-        <button class="btn btn--secondary" id="showFolderBtn">${COPY.showInFolder}</button>
+        <button class="btn btn--secondary" id="showFolderBtn" style="display:none">${COPY.showInFolder}</button>
       </div>
     </div>
     <div class="pane pane--output">
@@ -840,8 +848,9 @@ function showHistoryItem(rec: RunRecord) {
     const b = e.currentTarget as HTMLButtonElement;
     try { await navigator.clipboard.writeText(txt); flash(b, COPY.copied); } catch { flash(b, COPY.copyFailed); }
   });
-  wireSaveButton(resultEl.querySelector<HTMLButtonElement>("#saveBtn")!, rec.file, txt);
-  resultEl.querySelector<HTMLButtonElement>("#showFolderBtn")!.addEventListener("click", () => void revealSaveTarget());
+  const histShowFolder = resultEl.querySelector<HTMLButtonElement>("#showFolderBtn")!;
+  histShowFolder.addEventListener("click", () => void revealSaveTarget());
+  wireSaveButton(resultEl.querySelector<HTMLButtonElement>("#saveBtn")!, histShowFolder, rec.file, txt);
 }
 
 function renderHistory() {
