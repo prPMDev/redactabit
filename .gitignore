@@ -25,8 +25,9 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Local-only decision log (kept on disk, never published)
+# Local-only planning docs (kept on disk, never published)
 DECISIONS.md
+PRD.md
 
 # Local working docs (design, planning) - never published. Anchored to the repo root so the
 # public docs site at site/docs/ still tracks.
