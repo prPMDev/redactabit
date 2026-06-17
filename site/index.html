@@ -3,22 +3,26 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Frisket — Redact it before you paste it into AI</title>
-  <meta name="description" content="The free, open-source app that strips your identity from any document — and never leaves your machine." />
-  <meta name="theme-color" content="#0e1014" />
-  <meta name="color-scheme" content="dark" />
+  <title>Frisket — Mask the personal. Paste the rest.</title>
+  <meta name="description" content="The free, open-source app that swaps the personal details in any document for realistic fakes. It runs entirely on your machine." />
+  <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+  <meta name="color-scheme" content="light dark" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <!-- Bump ?v on each styles.css change so browsers/CDNs fetch the new file instead of a cached copy. -->
-  <link rel="stylesheet" href="styles.css?v=2" />
+  <link rel="stylesheet" href="styles.css?v=4" />
 
   <!-- Open Graph / Twitter (text only; self-hosted). TODO: add a real PNG og-image once the demo clip / screenshot exists. -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Frisket — Redact it before you paste it into AI" />
-  <meta property="og:description" content="The free, open-source app that strips your identity from any document — and never leaves your machine." />
+  <meta property="og:title" content="Frisket — Mask the personal. Paste the rest." />
+  <meta property="og:description" content="The free, open-source app that swaps the personal details in any document for realistic fakes. It runs entirely on your machine." />
   <meta property="og:url" content="https://prpmdev.github.io/frisket/" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Frisket — Redact it before you paste it into AI" />
-  <meta name="twitter:description" content="The free, open-source app that strips your identity from any document — and never leaves your machine." />
+  <meta name="twitter:title" content="Frisket — Mask the personal. Paste the rest." />
+  <meta name="twitter:description" content="The free, open-source app that swaps the personal details in any document for realistic fakes. It runs entirely on your machine." />
+
+  <!-- Apply the saved theme before paint so there's no flash. The toggle + persistence live in app.js. -->
+  <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 </head>
 <body>
   <!-- ===== Nav ===== -->
@@ -31,11 +35,13 @@
       <nav class="nav__links" aria-label="Primary">
         <a href="#download">Download</a>
         <a href="#how">How it works</a>
-        <!-- Docs: points at the repo README until the docs site ships (see plan). -->
-        <a href="https://github.com/prPMDev/frisket#readme">Docs</a>
+        <a href="docs/">Docs</a>
         <a href="https://github.com/prPMDev/frisket">GitHub</a>
       </nav>
       <div class="nav__right">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Color theme: System">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>
+        </button>
         <a class="btn btn--secondary btn--sm" href="https://github.com/prPMDev/frisket" aria-label="Star Frisket on GitHub">
           <span aria-hidden="true">★</span> Star on GitHub
         </a>
@@ -48,8 +54,8 @@
     <section class="hero" id="download">
       <div class="container">
         <span class="eyebrow"><span class="dot" aria-hidden="true"></span> Local-only · Open source</span>
-        <h1>Redact it before you paste it into AI.</h1>
-        <p class="sub">The free, open-source app that strips your identity from any document — and never leaves your machine.</p>
+        <h1>Mask the personal. Paste the rest.</h1>
+        <p class="sub">The free, open-source app that swaps the personal details in any document for realistic fakes. It runs entirely on your machine.</p>
         <div class="cta-row">
           <a class="btn btn--primary" data-download href="https://github.com/prPMDev/frisket/releases/latest">Download for Windows</a>
           <a class="btn btn--secondary" href="https://github.com/prPMDev/frisket/releases">Other platforms</a>
@@ -85,10 +91,10 @@
           </div>
           <div class="demo__legend">
             <span class="swatch"><span class="chip repl" aria-hidden="true"></span> Realistic fake data</span>
-            <span class="swatch"><span class="chip keep" aria-hidden="true"></span> Numbers kept — so AI can still help</span>
+            <span class="swatch"><span class="chip keep" aria-hidden="true"></span> Numbers kept, so AI can still help</span>
           </div>
         </div>
-        <p class="demo__note"><span class="play" aria-hidden="true">▶</span> Full before → after clip coming — recorded with Wi-Fi off, so you can watch it work with nothing connected.</p>
+        <p class="demo__note">Identity swapped for realistic fakes. The figures stay.</p>
       </div>
     </section>
 
@@ -101,14 +107,14 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
             </span>
             <h3>Private</h3>
-            <p>Nothing leaves your machine. Turn your Wi-Fi off and watch it still work.</p>
+            <p>Your document stays on your computer. Turn your Wi-Fi off and it still works.</p>
           </article>
           <article class="card">
             <span class="ico" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 7 4 12 9 17"/><polyline points="15 7 20 12 15 17"/></svg>
             </span>
             <h3>Open Source</h3>
-            <p>MIT-licensed. Read the code — don't just trust the promise.</p>
+            <p>MIT-licensed. Read the code and check it for yourself.</p>
           </article>
           <article class="card">
             <span class="ico" aria-hidden="true">
@@ -122,7 +128,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="m8 12 4 4 4-4"/><path d="M5 20h14"/></svg>
             </span>
             <h3>Simple</h3>
-            <p>Drop a file, get a clean one. Fake data keeps it readable — so AI can still help.</p>
+            <p>Drop a file, get a clean one. The fake data keeps it readable, so AI can still help.</p>
           </article>
         </div>
       </div>
@@ -136,15 +142,15 @@
         <div class="steps">
           <div class="step">
             <h3>Drop a file</h3>
-            <p>A PDF or text file goes in. It never gets uploaded anywhere.</p>
+            <p>A PDF or text file goes in. It stays on your machine.</p>
           </div>
           <div class="step">
-            <h3>Identity stripped, numbers kept</h3>
+            <h3>Personal details masked, numbers kept</h3>
             <p>Names, SSNs, and accounts become realistic fake data. The figures that matter stay put.</p>
           </div>
           <div class="step">
             <h3>Paste into AI or share</h3>
-            <p>Get a clean, readable copy you can hand to a chatbot — or anyone — without leaking who you are.</p>
+            <p>Get a clean, readable copy you can hand to a chatbot or anyone, without giving away who you are.</p>
           </div>
         </div>
       </div>
@@ -165,6 +171,7 @@
     </div>
   </footer>
 
-  <script src="app.js" defer></script>
+  <!-- Bump ?v on each app.js change too, so caches fetch the new file. -->
+  <script src="app.js?v=2" defer></script>
 </body>
 </html>
