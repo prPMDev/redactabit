@@ -10,7 +10,7 @@
   <meta name="color-scheme" content="light dark" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <!-- Bump ?v on each styles.css change so browsers/CDNs fetch the new file instead of a cached copy. -->
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <link rel="stylesheet" href="styles.css?v=8" />
 
   <!-- Open Graph / Twitter (text only; self-hosted). TODO: add a real PNG og-image once the demo clip / screenshot exists. -->
   <meta property="og:type" content="website" />
@@ -64,14 +64,13 @@
       </div>
     </section>
 
-    <!-- ===== Demo: before → after (the proof). Placeholder for the recorded clip. ===== -->
+    <!-- ===== Demo: one before → after at the default (Standard level, Fake replacement): identity gone, numbers kept. ===== -->
     <section class="section demo">
       <div class="container">
         <div class="demo__card">
           <div class="demo__bar">
             <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="file">bank-statement.pdf</span>
-            <span class="demo__wifi">Wi-Fi: <span class="off">off</span> ✈</span>
           </div>
           <div class="demo__grid">
             <div class="pane">
@@ -89,12 +88,12 @@
 <span class="k">Balance:</span> <span class="kept">$48,210.55</span></p>
             </div>
           </div>
-          <div class="demo__legend">
-            <span class="swatch"><span class="chip repl" aria-hidden="true"></span> Realistic fake data</span>
-            <span class="swatch"><span class="chip keep" aria-hidden="true"></span> Numbers kept, so AI can still help</span>
+          <div class="demo__settings">
+            <p><b>Redaction level</b> sets how much is hidden: Light · Standard · Heavy.</p>
+            <p><b>Replacement</b> sets what it becomes: Fake, Mask, or a [REDACTED] label.</p>
           </div>
         </div>
-        <p class="demo__note">Identity swapped for realistic fakes. The figures stay.</p>
+        <p class="demo__note">Shown at the default (Standard level, Fake replacement): the identity is gone, the numbers stay, and it all runs offline on your machine.</p>
       </div>
     </section>
 
@@ -114,7 +113,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 7 4 12 9 17"/><polyline points="15 7 20 12 15 17"/></svg>
             </span>
             <h3>Open Source</h3>
-            <p>MIT-licensed. Read the code and check it for yourself.</p>
+            <p>Open source (AGPL-3.0). Read the code and check it for yourself.</p>
           </article>
           <article class="card">
             <span class="ico" aria-hidden="true">
@@ -163,7 +162,7 @@
       <div class="footer-links">
         <span>Built by <a href="https://github.com/prPMDev">prPMDev</a></span>
         <span class="sep" aria-hidden="true">·</span>
-        <a href="https://github.com/prPMDev/frisket/blob/main/LICENSE">MIT License</a>
+        <a href="https://github.com/prPMDev/frisket/blob/main/LICENSE">AGPL-3.0</a>
         <span class="sep" aria-hidden="true">·</span>
         <a href="https://github.com/prPMDev/frisket">GitHub</a>
       </div>
@@ -172,6 +171,6 @@
   </footer>
 
   <!-- Bump ?v on each app.js change too, so caches fetch the new file. -->
-  <script src="app.js?v=2" defer></script>
+  <script src="app.js?v=5" defer></script>
 </body>
 </html>
