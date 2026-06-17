@@ -86,6 +86,28 @@ function wireSaveButton(btn: HTMLButtonElement, name: string, text: string) {
     else downloadText(name, text);
   });
 }
+// Binary twins of saveToFolder/downloadText, for the redacted PDF output.
+async function saveBytesToFolder(name: string, bytes: Uint8Array): Promise<string | null> {
+  try {
+    const { invoke } = await import("@tauri-apps/api/core");
+    const { join } = await import("@tauri-apps/api/path");
+    const full = await join(await currentSaveDir(), name.replace(/\.[^.]+$/, "") + "_redacted.pdf");
+    await invoke("write_bytes_file", { path: full, contents: Array.from(bytes) });
+    lastSavedPath = full;
+    diag.info("file_saved", { pdf: true });
+    return full;
+  } catch (e) {
+    diag.error("save_bytes_failed", e);
+    return null;
+  }
+}
+function downloadBytes(name: string, bytes: Uint8Array) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([bytes as unknown as BlobPart], { type: "application/pdf" }));
+  a.download = name.replace(/\.[^.]+$/, "") + "_redacted.pdf";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 
 // Advanced › "Save redacted files to": show the folder, let the user change it, reveal it.
 const saveDirInput = document.querySelector<HTMLInputElement>("#saveDirInput");
@@ -286,6 +308,8 @@ document.querySelector<HTMLButtonElement>("#regenSeed")?.addEventListener("click
 // ───────── file input (text + PDF) ─────────
 let currentText: string | null = null;
 let currentName = "document.txt";
+let currentFile: File | null = null; // original file kept so a PDF can be re-redacted AS a PDF at save time
+let currentIsPdf = false;
 
 const fileInput = document.createElement("input");
 fileInput.type = "file";
@@ -314,6 +338,8 @@ async function loadFile(file: File) {
   try {
     const text = await handler.read(file);
     if (!text.trim()) { setDropzone(COPY.pdfScannedTitle, COPY.pdfScannedBody); return; }
+    currentFile = file;
+    currentIsPdf = handler.id === "pdf";
     fileLoaded(file.name, text);
   } catch (err) {
     diag.error("file_read_failed", err, { handler: handler.id });
@@ -711,7 +737,7 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
     resultEl.className = "result";
     resultEl.innerHTML = `<div class="icon">⤓</div><div>${COPY.resultPlaceholder}</div>`;
     document.querySelector<HTMLElement>(".content")!.scrollTop = 0;
-    if (pickFile) fileInput.click();
+    if (pickFile) { currentFile = null; currentIsPdf = false; fileInput.click(); } // "New file": drop stale bytes
   };
   resultEl.querySelector<HTMLButtonElement>("#editBtn")!.addEventListener("click", () => backToInput(false));
   resultEl.querySelector<HTMLButtonElement>("#newFileBtn")!.addEventListener("click", () => backToInput(true));
@@ -721,7 +747,35 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
     try { await navigator.clipboard.writeText(redacted); flash(btn, COPY.copied); }
     catch { flash(btn, COPY.copyFailed); }
   });
-  wireSaveButton(resultEl.querySelector<HTMLButtonElement>("#saveBtn")!, currentName, redacted);
+  const saveBtn = resultEl.querySelector<HTMLButtonElement>("#saveBtn")!;
+  if (currentIsPdf && currentFile) {
+    // PDF in → redacted PDF out: truly remove the PII (mupdf) + draw the replacements (pdf-lib),
+    // then save bytes. Refuse to save if anything survives re-extraction. Text preview above stays
+    // as the verification UI. (pdf-redact is dynamic-imported so mupdf/pdf-lib stay out of the main bundle.)
+    const pdfFile = currentFile, name = currentName;
+    saveBtn.addEventListener("click", async () => {
+      saveBtn.disabled = true;
+      saveBtn.textContent = COPY.redactingPdf;
+      try {
+        const { redactPdf } = await import("./pdf-redact");
+        const repl = changes.map((c) => ({ original: c.fullOriginal, replacement: c.fullReplaced }));
+        const src = new Uint8Array(await pdfFile.arrayBuffer());
+        const { bytes, survivors } = await redactPdf(src, repl);
+        saveBtn.textContent = COPY.save; // restore base label before flashing
+        if (survivors.length) { diag.error("pdf_redact_survivors", null, { count: survivors.length }); flash(saveBtn, COPY.pdfLeakError); return; }
+        const full = await saveBytesToFolder(name, bytes);
+        if (full) flash(saveBtn, COPY.saved); else downloadBytes(name, bytes);
+      } catch (e) {
+        diag.error("pdf_redact_failed", e);
+        saveBtn.textContent = COPY.save;
+        flash(saveBtn, COPY.pdfLeakError);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+  } else {
+    wireSaveButton(saveBtn, currentName, redacted);
+  }
   resultEl.querySelector<HTMLButtonElement>("#showFolderBtn")!.addEventListener("click", () => void revealSaveTarget());
 }
 
