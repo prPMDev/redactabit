@@ -35,6 +35,81 @@ async function openAppDir(which: "data" | "log") {
   }
 }
 
+// ───────── save redacted files to a real folder (Tauri) ─────────
+// In the packaged app, "Save" writes the redacted text to a user-chosen folder via a tiny Rust
+// command and reveals it; the folder defaults to <Downloads>/Frisket and is remembered. In the
+// plain browser build (npm run dev) there's no Tauri backend, so each step throws and callers
+// fall back to the blob download — same airplane-mode-safe, dynamic-import pattern as the opens.
+const SAVE_DIR_KEY = "frisket.saveDir.v1";
+async function defaultSaveDir(): Promise<string> {
+  const { downloadDir, join } = await import("@tauri-apps/api/path");
+  return await join(await downloadDir(), "Frisket");
+}
+async function currentSaveDir(): Promise<string> {
+  return localStorage.getItem(SAVE_DIR_KEY) || (await defaultSaveDir());
+}
+// Write <name>_redacted.txt into the save folder. Returns the full path, or null when there's
+// no Tauri backend (browser dev) so the caller can fall back to a download. Quiet by design:
+// it never pops the file explorer — revealing is on demand via revealSaveTarget().
+let lastSavedPath: string | null = null;
+async function saveToFolder(name: string, text: string): Promise<string | null> {
+  try {
+    const { invoke } = await import("@tauri-apps/api/core");
+    const { join } = await import("@tauri-apps/api/path");
+    const full = await join(await currentSaveDir(), name.replace(/\.[^.]+$/, "") + "_redacted.txt");
+    await invoke("write_text_file", { path: full, contents: text });
+    lastSavedPath = full;
+    diag.info("file_saved", {});
+    return full;
+  } catch (e) {
+    diag.error("save_failed", e);
+    return null;
+  }
+}
+// On-demand reveal: open the file explorer at the last saved file, or the save folder if
+// nothing has been saved yet. Only ever called from a "Show in folder" click.
+async function revealSaveTarget() {
+  try {
+    const { invoke } = await import("@tauri-apps/api/core");
+    const { revealItemInDir } = await import("@tauri-apps/plugin-opener");
+    if (lastSavedPath) { await revealItemInDir(lastSavedPath); return; }
+    const dir = await currentSaveDir();
+    try { await invoke("ensure_dir", { path: dir }); } catch { /* may exist / browser dev */ }
+    await revealItemInDir(dir);
+  } catch (e) { diag.error("reveal_failed", e); }
+}
+// Shared wiring for the result/history "Save" button: write to the folder, else download.
+function wireSaveButton(btn: HTMLButtonElement, name: string, text: string) {
+  btn.addEventListener("click", async () => {
+    const full = await saveToFolder(name, text);
+    if (full) flash(btn, COPY.saved);
+    else downloadText(name, text);
+  });
+}
+
+// Advanced › "Save redacted files to": show the folder, let the user change it, reveal it.
+const saveDirInput = document.querySelector<HTMLInputElement>("#saveDirInput");
+async function refreshSaveDirInput() {
+  if (!saveDirInput) return;
+  try { saveDirInput.value = await currentSaveDir(); } catch { saveDirInput.value = "Downloads/Frisket"; }
+}
+void refreshSaveDirInput();
+document.querySelector<HTMLButtonElement>("#pickSaveDir")?.addEventListener("click", async () => {
+  try {
+    const { open } = await import("@tauri-apps/plugin-dialog");
+    const sel = await open({ directory: true, multiple: false });
+    if (typeof sel === "string") { localStorage.setItem(SAVE_DIR_KEY, sel); void refreshSaveDirInput(); }
+  } catch (e) { diag.error("pick_dir_failed", e); }
+});
+document.querySelector<HTMLButtonElement>("#openSaveDir")?.addEventListener("click", async () => {
+  try {
+    const { invoke } = await import("@tauri-apps/api/core");
+    const { revealItemInDir } = await import("@tauri-apps/plugin-opener");
+    const dir = await currentSaveDir();
+    try { await invoke("ensure_dir", { path: dir }); } catch { /* may already exist / browser dev */ }
+    await revealItemInDir(dir);
+  } catch (e) { diag.error("open_savedir_failed", e); }
+});
 
 // Copy the privacy-safe diagnostics log to the clipboard (blob downloads don't fire in WebView2).
 document.querySelector<HTMLButtonElement>("#exportDiag")?.addEventListener("click", async (e) => {
@@ -582,7 +657,8 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
       <div class="result-actions">
         <button class="btn btn--secondary" id="revealBtn" aria-pressed="false">${COPY.reveal}</button>
         <button class="btn btn--secondary" id="copyBtn">${COPY.copyRedacted}</button>
-        <button class="btn btn--secondary" id="dlBtn">${COPY.download}</button>
+        <button class="btn btn--secondary" id="saveBtn">${COPY.save}</button>
+        <button class="btn btn--secondary" id="showFolderBtn">${COPY.showInFolder}</button>
       </div>
     </div>
     <div class="chips">${chips}</div>
@@ -645,7 +721,8 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
     try { await navigator.clipboard.writeText(redacted); flash(btn, COPY.copied); }
     catch { flash(btn, COPY.copyFailed); }
   });
-  resultEl.querySelector<HTMLButtonElement>("#dlBtn")!.addEventListener("click", () => downloadText(currentName, redacted));
+  wireSaveButton(resultEl.querySelector<HTMLButtonElement>("#saveBtn")!, currentName, redacted);
+  resultEl.querySelector<HTMLButtonElement>("#showFolderBtn")!.addEventListener("click", () => void revealSaveTarget());
 }
 
 // ───────── run log (privacy-safe: metadata + counts ONLY, never the PII) ─────────
@@ -690,7 +767,8 @@ function showHistoryItem(rec: RunRecord) {
       <div class="group-h">${COPY.reopened}</div>
       <div class="result-actions">
         <button class="btn btn--secondary" id="copyBtn">${COPY.copyRedacted}</button>
-        <button class="btn btn--secondary" id="dlBtn">${COPY.download}</button>
+        <button class="btn btn--secondary" id="saveBtn">${COPY.save}</button>
+        <button class="btn btn--secondary" id="showFolderBtn">${COPY.showInFolder}</button>
       </div>
     </div>
     <div class="pane pane--output">
@@ -708,7 +786,8 @@ function showHistoryItem(rec: RunRecord) {
     const b = e.currentTarget as HTMLButtonElement;
     try { await navigator.clipboard.writeText(txt); flash(b, COPY.copied); } catch { flash(b, COPY.copyFailed); }
   });
-  resultEl.querySelector<HTMLButtonElement>("#dlBtn")!.addEventListener("click", () => downloadText(rec.file, txt));
+  wireSaveButton(resultEl.querySelector<HTMLButtonElement>("#saveBtn")!, rec.file, txt);
+  resultEl.querySelector<HTMLButtonElement>("#showFolderBtn")!.addEventListener("click", () => void revealSaveTarget());
 }
 
 function renderHistory() {
@@ -755,5 +834,4 @@ function wireArmedClear(sel: string, doneMsg?: string) {
     if (doneMsg) setTimeout(() => { btn.textContent = COPY.clearHistory; }, 1500);
   });
 }
-wireArmedClear("#clearHist");
-wireArmedClear("#clearAll", COPY.cleared); // Advanced › "Clear saved history": same effect
+wireArmedClear("#clearHist", COPY.cleared); // History tab is the single home for clearing

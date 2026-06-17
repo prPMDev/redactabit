@@ -57,6 +57,9 @@ export const COPY = {
   hide: "Hide originals",
   copyRedacted: "Copy redacted",
   download: "Download",
+  save: "Save",
+  saved: "Saved ✓",
+  showInFolder: "Show in folder",
   editSettings: "Edit settings",
   newFile: "New file",
 
@@ -74,11 +77,10 @@ export const COPY = {
 // Static info-tooltip texts, keyed by the icon's data-tip attribute. Level and mode tips
 // are NOT here — they compose from the engine registries at runtime (single source).
 export const TIPS: Record<string, string> = {
-  detection: "The detection method in use. Click to switch it, or open the Detection tab to add models.",
+  detection: "The detection method in use. Click to switch it, or open the Models tab to add more.",
   customTerms: "Your own words to always redact: an employer, a nickname, a project name. Separate with commas.",
-  seed: "Picks which fake values you get. Same set, same fakes, every run. It's not a password and can't un-redact anything.",
-  saveTo: "Where your redacted files are saved.",
-  clearHistory: "Clears the local history log. Your original files were never saved.",
+  seed: "Controls which fake values are used as replacements. Keep it the same to get identical results each run, or regenerate for a different set.",
+  saveTo: "The folder where redacted files are saved when you click Save. Change it to any folder you like.",
   source: "Frisket is open source (MIT).",
   support: "No donations. A star or a share helps.",
   diagnostics: "A privacy-safe event log: never your document, the matches, or file names. Copy it to report an issue.",
