@@ -497,14 +497,17 @@ function setActiveModel(id: string) {
 function modelCardHtml(m: ModelDef, installed: boolean, active: boolean): string {
   const store = m.storeKey ? ` data-store="${m.storeKey}"` : "";
   const badge = active ? `<span class="pill pill--active active-badge">✓ Active</span>` : "";
+  // Installed cards get a "Remove" (delete the downloaded weights) grouped with their action button.
+  const remove = `<button class="linkbtn" data-remove-model="${m.id}">${COPY.removeModel}</button>`;
+  const group = (btn: string) => `<span style="display:inline-flex;gap:14px;align-items:center">${btn}${remove}</span>`;
   const foot = !m.available
     ? `<span>${escapeHtml(m.card.size)}</span><button class="linkbtn" disabled style="opacity:.5">Later</button>`
     : !installed
       ? `<span>${escapeHtml(m.card.size)}</span><button class="linkbtn" data-dl-model="${m.id}">${COPY.dlIdle}</button>`
       : active
-        ? `<span>${escapeHtml(m.card.size)}</span><button class="linkbtn" disabled>${COPY.dlDone}</button>`
+        ? `<span>${escapeHtml(m.card.size)}</span>${group(`<button class="linkbtn" disabled>${COPY.dlDone}</button>`)}`
         // installed but not active -> the card-level switcher (mirrors the statusbar menu)
-        : `<span>${escapeHtml(m.card.size)}</span><button class="linkbtn" data-use-model="${m.id}">${COPY.useModel}</button>`;
+        : `<span>${escapeHtml(m.card.size)}</span>${group(`<button class="linkbtn" data-use-model="${m.id}">${COPY.useModel}</button>`)}`;
   return `<div class="model-card${active ? " model-card--active" : ""}" data-model="${m.id}"${store}>
     <div class="model-card__top">
       <div><div class="model-card__name">${escapeHtml(m.card.name)}${badge}</div><div class="model-card__desc">${escapeHtml(m.card.desc)}</div></div>
@@ -558,6 +561,26 @@ function renderModelChip() {
 // installed, inactive card) switches the active model — same effect as the statusbar menu.
 modelsScreenEl?.addEventListener("click", async (e) => {
   const target = e.target as HTMLElement;
+  // "Remove" (arm-twice) — checked first so it doesn't also fire the card's switch-active click.
+  const rmBtn = target.closest<HTMLButtonElement>("button[data-remove-model]");
+  if (rmBtn) {
+    e.stopPropagation();
+    const m = getModel(rmBtn.dataset.removeModel!);
+    if (!m) return;
+    if (rmBtn.dataset.armed !== "1") {
+      rmBtn.dataset.armed = "1";
+      rmBtn.textContent = COPY.removeArmed;
+      setTimeout(() => { if (rmBtn.isConnected) { rmBtn.dataset.armed = "0"; rmBtn.textContent = COPY.removeModel; } }, 2500);
+      return;
+    }
+    if (m.id === activeModel()) setActiveModel(getBuiltin().id); // removed the active model -> fall back to rules-only
+    try { await m.detector?.remove?.(); } catch (err) { diag.error("model_remove_failed", err, { model: m.id }); }
+    if (m.storeKey) localStorage.removeItem(m.storeKey);
+    diag.info("model_removed", { model: m.id });
+    placeModelCards();
+    renderModelChip();
+    return;
+  }
   const btn = target.closest<HTMLButtonElement>("button[data-dl-model]");
   if (!btn) {
     const useBtn = target.closest<HTMLElement>("[data-use-model]");

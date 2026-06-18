@@ -28,6 +28,8 @@ export const COPY = {
   dlRetry: "⤓ Download (retry)",
   dlBadge: "Download",            // dropdown badge for an uninstalled model (was "Get →")
   useModel: "Use this model",     // installed-but-inactive card: click to make it the active model
+  removeModel: "Remove",          // installed card: delete the downloaded weights (arm-twice to confirm)
+  removeArmed: "Click again to remove",
 
   // redact button (phase labels narrate the real pipeline; the mode's own verb comes
   // from the engine MODES registry — each mode owns its busy line like it owns its label)

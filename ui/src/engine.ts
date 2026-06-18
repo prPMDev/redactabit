@@ -199,6 +199,8 @@ export interface Detector {
   load?(onProgress?: (p: unknown) => void): Promise<void>;
   // onProgress (0..1) lets a slow detector report sub-progress (e.g. NER, per window).
   detect(text: string, onProgress?: (frac: number) => void): RawMatch[] | Promise<RawMatch[]>;
+  // Optional teardown: free the in-memory model + delete its cached weights (reclaim disk).
+  remove?(): Promise<void>;
 }
 
 // Priority for model-emitted spans: LOW, so exact regex (10-100) and custom terms (200)
