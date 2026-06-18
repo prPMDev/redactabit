@@ -3,12 +3,16 @@ name: Deploy site to GitHub Pages
 # Publishes the static site in site/ to GitHub Pages.
 # One-time setup: Settings → Pages → Source → "GitHub Actions".
 
+# PAUSED until launch: the repo is private, so GitHub Pages isn't enabled and this deploy fails on
+# every push that touches site/. To re-enable at launch: (1) make the repo public, (2) Settings →
+# Pages → Source → "GitHub Actions", (3) uncomment the `push:` trigger below. Until then it only
+# runs on manual dispatch, so it never auto-fails. (Does not affect CI, builds, or local dev.)
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'site/**'
-      - '.github/workflows/pages.yml'
+  # push:                       # ← restore at launch (repo public + Pages enabled)
+  #   branches: [main]
+  #   paths:
+  #     - 'site/**'
+  #     - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
