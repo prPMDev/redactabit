@@ -34,8 +34,8 @@ describe("level gating", () => {
 });
 
 describe("modes", () => {
-  it("redact mode uses the [TAG]", () =>
-    expect(textOut("SSN: 123-45-6789", 1, "redact")).toContain("[SSN REDACTED]"));
+  it("redact mode uses a uniform, type-free [REDACTED]", () =>
+    expect(textOut("SSN: 123-45-6789", 1, "redact")).toContain("[REDACTED]"));
   it("mask mode reveals the last 4", () =>
     expect(textOut("SSN: 123-45-6789", 1, "mask")).toContain("6789"));
   it("fake mode removes the original value", () =>
@@ -81,7 +81,7 @@ describe("detector pipeline (Phase A)", () => {
       },
     };
     const r = await redactAsync("Dear Marcus", 2, "redact", [], new Faker("seed"), [fakeModel]);
-    expect(r.text).toContain("[NAME REDACTED]");
+    expect(r.text).toContain("[REDACTED]");
     expect(r.text).not.toContain("Marcus");
   });
 
@@ -92,7 +92,7 @@ describe("detector pipeline (Phase A)", () => {
       detect: (t) => [{ start: 0, end: t.length, label: "Person", priority: 15, fake: "name", mask: null, tag: "[NAME REDACTED]" }],
     };
     const r = await redactAsync("123-45-6789", 1, "redact", [], new Faker("seed"), [greedyModel]);
-    expect(r.text).toBe("[SSN REDACTED]"); // regex SSN (90) beats the model span (15)
+    expect(r.text).toBe("[REDACTED]"); // regex SSN (90) beats the model span (15) — uniform marker
   });
 });
 

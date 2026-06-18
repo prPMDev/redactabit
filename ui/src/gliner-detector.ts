@@ -211,6 +211,16 @@ export class GLiNERDetector implements Detector {
     return this.loading;
   }
 
+  /** Free the in-memory session/tokenizer AND delete the persisted weights from the Cache API
+   *  (reclaim ~200 MB). Local-only — no network, so the airplane-mode guarantee holds. */
+  async remove(): Promise<void> {
+    try { await (this.session as unknown as { release?: () => Promise<void> })?.release?.(); } catch { /* best effort */ }
+    this.session = null; this.tok = null; this.loading = null;
+    try {
+      if (typeof caches !== "undefined") await (await caches.open(MODEL_CACHE)).delete(modelUrlOf(this.src));
+    } catch { diag.warn("model_cache_delete_failed", { file: this.src.file }); }
+  }
+
   private tensor(type: string, data: unknown, dims: number[]) {
     return new this.Tensor!(type, data, dims);
   }
@@ -287,6 +297,8 @@ export class GLiNERDetector implements Detector {
 /** Fetch the ONNX weights: local bundle, else the Cache API copy, else HF — then PERSIST the
  *  download in the Cache API so a restart never re-pulls ~200 MB from throttled HF. */
 const MODEL_CACHE = "frisket-models-v1";
+// Single source of truth for a model's weights URL — fetch + remove must agree on the cache key.
+const modelUrlOf = (src: GlinerModelSource): string => src.modelUrl ?? `https://huggingface.co/${src.repo}/resolve/main/${src.file}`;
 
 async function fetchModel(src: GlinerModelSource, onProgress?: (p: unknown) => void): Promise<Uint8Array> {
   if (src.localFile) {
@@ -296,7 +308,7 @@ async function fetchModel(src: GlinerModelSource, onProgress?: (p: unknown) => v
     } catch { /* not bundled — fall through */ }
   }
   // Weights live wherever the manifest says (Releases/R2/own mirror); default is the HF repo file.
-  const url = src.modelUrl ?? `https://huggingface.co/${src.repo}/resolve/main/${src.file}`;
+  const url = modelUrlOf(src);
   // Downloaded before? Serve from persistent cache storage (instant + offline).
   try {
     if (typeof caches !== "undefined") {

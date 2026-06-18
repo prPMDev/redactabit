@@ -199,6 +199,8 @@ export interface Detector {
   load?(onProgress?: (p: unknown) => void): Promise<void>;
   // onProgress (0..1) lets a slow detector report sub-progress (e.g. NER, per window).
   detect(text: string, onProgress?: (frac: number) => void): RawMatch[] | Promise<RawMatch[]>;
+  // Optional teardown: free the in-memory model + delete its cached weights (reclaim disk).
+  remove?(): Promise<void>;
 }
 
 // Priority for model-emitted spans: LOW, so exact regex (10-100) and custom terms (200)
@@ -228,10 +230,14 @@ export interface ModeDef {
   busy: string;   // in-progress status verb shown while this mode is being applied
   apply: (m: RawMatch, orig: string, fk: Faker) => string;
 }
+// Uniform, type-free output marker. A per-type tag ("[ACCOUNT REDACTED]") tells a reader
+// exactly what sat there — that's a leak. Every redaction reads the same "[REDACTED]".
+// (Detectors still set m.tag; it's internal metadata now, no longer surfaced in the output.)
+const REDACTED = "[REDACTED]";
 export const MODES = [
-  { id: "fake",   label: "Fake",  hint: "Realistic stand-ins. The doc stays readable for AI.", busy: "Replacing with fake data…",   apply: (m: RawMatch, orig: string, fk: Faker) => (m.fake ? fk.apply(m.fake, orig) || m.tag : m.tag) },
-  { id: "mask",   label: "Mask",  hint: "Keeps only the last digits, like XXX-XX-6789.",       busy: "Masking to the last digits…", apply: (m: RawMatch, orig: string) => (m.mask ? m.mask(orig) : m.tag) },
-  { id: "redact", label: "Label", hint: "A plain [REDACTED] tag in place of the value.",       busy: "Adding [REDACTED] labels…",   apply: (m: RawMatch) => m.tag },
+  { id: "fake",   label: "Fake",  hint: "Realistic stand-ins. The doc stays readable for AI.", busy: "Replacing with fake data…",   apply: (m: RawMatch, orig: string, fk: Faker) => (m.fake ? fk.apply(m.fake, orig) || REDACTED : REDACTED) },
+  { id: "mask",   label: "Mask",  hint: "Keeps only the last digits, like XXX-XX-6789.",       busy: "Masking to the last digits…", apply: (m: RawMatch, orig: string) => (m.mask ? m.mask(orig) : REDACTED) },
+  { id: "redact", label: "Label", hint: "A plain [REDACTED] tag in place of the value.",       busy: "Adding [REDACTED] labels…",   apply: () => REDACTED },
 ] as const satisfies readonly ModeDef[];
 export type Mode = (typeof MODES)[number]["id"];
 export const DEFAULT_MODE: Mode = "fake";

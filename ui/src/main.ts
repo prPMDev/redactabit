@@ -1,5 +1,5 @@
 import { redactAsync, Faker, LEVELS, MODES, DEFAULT_LEVEL, DEFAULT_MODE, type Mode, type Change, type RedactPhase } from "./engine";
-import { COPY, TIPS } from "./strings";
+import { COPY, TIPS, CHIP_LABELS } from "./strings";
 import { getModels, getBuiltin, getModel, isInstalled, installedModels, subscribe, initCatalog, type ModelDef } from "./catalog";
 import { handlerFor, fileAccept, fileHint } from "./files";
 import * as diag from "./diag";
@@ -51,12 +51,22 @@ async function currentSaveDir(): Promise<string> {
 // Write <name>_redacted.txt into the save folder. Returns the full path, or null when there's
 // no Tauri backend (browser dev) so the caller can fall back to a download. Quiet by design:
 // it never pops the file explorer — revealing is on demand via revealSaveTarget().
+
+// Saved-file naming: <base>_<Level>_<Mode>_redacted.<ext> (issue #4). redactMeta holds the
+// current view's level/mode labels (set at render time), so all four save/download helpers
+// agree — including a reopened history item, which carries its OWN level/mode, not the live controls.
+let redactMeta = { level: "", mode: "" };
+function redactedName(name: string, level: string, mode: string, ext: string): string {
+  const base = name.replace(/\.[^.]+$/, "");
+  const safe = (s: string) => s.replace(/[^A-Za-z0-9]+/g, "");
+  return [base, safe(level), safe(mode), "redacted"].filter(Boolean).join("_") + "." + ext;
+}
 let lastSavedPath: string | null = null;
 async function saveToFolder(name: string, text: string): Promise<string | null> {
   try {
     const { invoke } = await import("@tauri-apps/api/core");
     const { join } = await import("@tauri-apps/api/path");
-    const full = await join(await currentSaveDir(), name.replace(/\.[^.]+$/, "") + "_redacted.txt");
+    const full = await join(await currentSaveDir(), redactedName(name, redactMeta.level, redactMeta.mode, "txt"));
     await invoke("write_text_file", { path: full, contents: text });
     lastSavedPath = full;
     diag.info("file_saved", {});
@@ -78,13 +88,42 @@ async function revealSaveTarget() {
     await revealItemInDir(dir);
   } catch (e) { diag.error("reveal_failed", e); }
 }
-// Shared wiring for the result/history "Save" button: write to the folder, else download.
-function wireSaveButton(btn: HTMLButtonElement, name: string, text: string) {
-  btn.addEventListener("click", async () => {
+// After a successful folder-save, swap Save → Show in folder (sequential — never both at once;
+// "Show in folder" makes no sense until there's a saved file to reveal).
+function markSaved(saveBtn: HTMLButtonElement, showFolderBtn: HTMLButtonElement) {
+  saveBtn.textContent = COPY.saved;
+  setTimeout(() => { saveBtn.style.display = "none"; showFolderBtn.style.display = ""; }, 1000);
+}
+// Shared wiring for the result/history "Save" button: write to the folder (then "Show in folder"
+// takes its place), else download (browser dev, no folder).
+function wireSaveButton(saveBtn: HTMLButtonElement, showFolderBtn: HTMLButtonElement, name: string, text: string) {
+  saveBtn.addEventListener("click", async () => {
     const full = await saveToFolder(name, text);
-    if (full) flash(btn, COPY.saved);
+    if (full) markSaved(saveBtn, showFolderBtn);
     else downloadText(name, text);
   });
+}
+// Binary twins of saveToFolder/downloadText, for the redacted PDF output.
+async function saveBytesToFolder(name: string, bytes: Uint8Array): Promise<string | null> {
+  try {
+    const { invoke } = await import("@tauri-apps/api/core");
+    const { join } = await import("@tauri-apps/api/path");
+    const full = await join(await currentSaveDir(), redactedName(name, redactMeta.level, redactMeta.mode, "pdf"));
+    await invoke("write_bytes_file", { path: full, contents: Array.from(bytes) });
+    lastSavedPath = full;
+    diag.info("file_saved", { pdf: true });
+    return full;
+  } catch (e) {
+    diag.error("save_bytes_failed", e);
+    return null;
+  }
+}
+function downloadBytes(name: string, bytes: Uint8Array) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([bytes as unknown as BlobPart], { type: "application/pdf" }));
+  a.download = redactedName(name, redactMeta.level, redactMeta.mode, "pdf");
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // Advanced › "Save redacted files to": show the folder, let the user change it, reveal it.
@@ -286,6 +325,8 @@ document.querySelector<HTMLButtonElement>("#regenSeed")?.addEventListener("click
 // ───────── file input (text + PDF) ─────────
 let currentText: string | null = null;
 let currentName = "document.txt";
+let currentFile: File | null = null; // original file kept so a PDF can be re-redacted AS a PDF at save time
+let currentIsPdf = false;
 
 const fileInput = document.createElement("input");
 fileInput.type = "file";
@@ -314,6 +355,8 @@ async function loadFile(file: File) {
   try {
     const text = await handler.read(file);
     if (!text.trim()) { setDropzone(COPY.pdfScannedTitle, COPY.pdfScannedBody); return; }
+    currentFile = file;
+    currentIsPdf = handler.id === "pdf";
     fileLoaded(file.name, text);
   } catch (err) {
     diag.error("file_read_failed", err, { handler: handler.id });
@@ -464,14 +507,17 @@ function setActiveModel(id: string) {
 function modelCardHtml(m: ModelDef, installed: boolean, active: boolean): string {
   const store = m.storeKey ? ` data-store="${m.storeKey}"` : "";
   const badge = active ? `<span class="pill pill--active active-badge">✓ Active</span>` : "";
+  // Installed cards get a "Remove" (delete the downloaded weights) grouped with their action button.
+  const remove = `<button class="linkbtn" data-remove-model="${m.id}">${COPY.removeModel}</button>`;
+  const group = (btn: string) => `<span style="display:inline-flex;gap:14px;align-items:center">${btn}${remove}</span>`;
   const foot = !m.available
     ? `<span>${escapeHtml(m.card.size)}</span><button class="linkbtn" disabled style="opacity:.5">Later</button>`
     : !installed
       ? `<span>${escapeHtml(m.card.size)}</span><button class="linkbtn" data-dl-model="${m.id}">${COPY.dlIdle}</button>`
       : active
-        ? `<span>${escapeHtml(m.card.size)}</span><button class="linkbtn" disabled>${COPY.dlDone}</button>`
+        ? `<span>${escapeHtml(m.card.size)}</span>${group(`<button class="linkbtn" disabled>${COPY.dlDone}</button>`)}`
         // installed but not active -> the card-level switcher (mirrors the statusbar menu)
-        : `<span>${escapeHtml(m.card.size)}</span><button class="linkbtn" data-use-model="${m.id}">${COPY.useModel}</button>`;
+        : `<span>${escapeHtml(m.card.size)}</span>${group(`<button class="linkbtn" data-use-model="${m.id}">${COPY.useModel}</button>`)}`;
   return `<div class="model-card${active ? " model-card--active" : ""}" data-model="${m.id}"${store}>
     <div class="model-card__top">
       <div><div class="model-card__name">${escapeHtml(m.card.name)}${badge}</div><div class="model-card__desc">${escapeHtml(m.card.desc)}</div></div>
@@ -525,6 +571,26 @@ function renderModelChip() {
 // installed, inactive card) switches the active model — same effect as the statusbar menu.
 modelsScreenEl?.addEventListener("click", async (e) => {
   const target = e.target as HTMLElement;
+  // "Remove" (arm-twice) — checked first so it doesn't also fire the card's switch-active click.
+  const rmBtn = target.closest<HTMLButtonElement>("button[data-remove-model]");
+  if (rmBtn) {
+    e.stopPropagation();
+    const m = getModel(rmBtn.dataset.removeModel!);
+    if (!m) return;
+    if (rmBtn.dataset.armed !== "1") {
+      rmBtn.dataset.armed = "1";
+      rmBtn.textContent = COPY.removeArmed;
+      setTimeout(() => { if (rmBtn.isConnected) { rmBtn.dataset.armed = "0"; rmBtn.textContent = COPY.removeModel; } }, 2500);
+      return;
+    }
+    if (m.id === activeModel()) setActiveModel(getBuiltin().id); // removed the active model -> fall back to rules-only
+    try { await m.detector?.remove?.(); } catch (err) { diag.error("model_remove_failed", err, { model: m.id }); }
+    if (m.storeKey) localStorage.removeItem(m.storeKey);
+    diag.info("model_removed", { model: m.id });
+    placeModelCards();
+    renderModelChip();
+    return;
+  }
   const btn = target.closest<HTMLButtonElement>("button[data-dl-model]");
   if (!btn) {
     const useBtn = target.closest<HTMLElement>("[data-use-model]");
@@ -624,9 +690,17 @@ function downloadText(name: string, text: string) {
   const blob = new Blob([text], { type: "text/plain" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = name.replace(/\.[^.]+$/, "") + "_redacted.txt";
+  a.download = redactedName(name, redactMeta.level, redactMeta.mode, "txt");
   a.click();
   URL.revokeObjectURL(a.href);
+}
+// Humanize a raw pattern name for DISPLAY (result chips + History breakdown): strip the
+// "NER:" prefix, map the cryptic internal names (CHIP_LABELS), capitalize. The raw name stays
+// the key everywhere (chip data-type, byType), so navigation + grouping are unaffected.
+function chipLabel(pattern: string): string {
+  const base = pattern.replace(/^NER:/, "");
+  const friendly = CHIP_LABELS[pattern] ?? CHIP_LABELS[base] ?? base;
+  return friendly.charAt(0).toUpperCase() + friendly.slice(1);
 }
 function renderResult(original: string, redacted: string, changes: Change[]) {
   if (changes.length === 0) {
@@ -637,13 +711,15 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
   }
   resultEl.className = "result result--filled";
   screen.classList.add("redacted");
+  redactMeta = { level: activeLabel(levelGroup), mode: activeLabel(modeGroup) };
   const typeCount = new Set(changes.map((c) => c.pattern)).size;
 
-  // type → count, for the at-a-glance summary chips (scales to any number of items)
+  // type → count, for the at-a-glance summary chips (scales to any number of items).
+  // chipLabel (module-level) humanizes the DISPLAY; data-type keeps the raw name for navigation.
   const counts = new Map<string, number>();
   for (const c of changes) counts.set(c.pattern, (counts.get(c.pattern) ?? 0) + 1);
   const chips = [...counts.entries()]
-    .map(([name, n]) => `<button type="button" class="chip" data-type="${escapeHtml(name)}" title="Find ${escapeHtml(name)} in the output">${escapeHtml(name)}${n > 1 ? ` <span class="chip__n">×${n}</span>` : ""}</button>`).join("");
+    .map(([name, n]) => { const lbl = chipLabel(name); return `<button type="button" class="chip" data-type="${escapeHtml(name)}" title="Find ${escapeHtml(lbl)} in the output">${escapeHtml(lbl)}${n > 1 ? ` <span class="chip__n">×${n}</span>` : ""}</button>`; }).join("");
 
   resultEl.innerHTML = `
     <div class="inputbar">
@@ -658,7 +734,7 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
         <button class="btn btn--secondary" id="revealBtn" aria-pressed="false">${COPY.reveal}</button>
         <button class="btn btn--secondary" id="copyBtn">${COPY.copyRedacted}</button>
         <button class="btn btn--secondary" id="saveBtn">${COPY.save}</button>
-        <button class="btn btn--secondary" id="showFolderBtn">${COPY.showInFolder}</button>
+        <button class="btn btn--secondary" id="showFolderBtn" style="display:none">${COPY.showInFolder}</button>
       </div>
     </div>
     <div class="chips">${chips}</div>
@@ -711,7 +787,7 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
     resultEl.className = "result";
     resultEl.innerHTML = `<div class="icon">⤓</div><div>${COPY.resultPlaceholder}</div>`;
     document.querySelector<HTMLElement>(".content")!.scrollTop = 0;
-    if (pickFile) fileInput.click();
+    if (pickFile) { currentFile = null; currentIsPdf = false; fileInput.click(); } // "New file": drop stale bytes
   };
   resultEl.querySelector<HTMLButtonElement>("#editBtn")!.addEventListener("click", () => backToInput(false));
   resultEl.querySelector<HTMLButtonElement>("#newFileBtn")!.addEventListener("click", () => backToInput(true));
@@ -721,8 +797,37 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
     try { await navigator.clipboard.writeText(redacted); flash(btn, COPY.copied); }
     catch { flash(btn, COPY.copyFailed); }
   });
-  wireSaveButton(resultEl.querySelector<HTMLButtonElement>("#saveBtn")!, currentName, redacted);
-  resultEl.querySelector<HTMLButtonElement>("#showFolderBtn")!.addEventListener("click", () => void revealSaveTarget());
+  const saveBtn = resultEl.querySelector<HTMLButtonElement>("#saveBtn")!;
+  const showFolderBtn = resultEl.querySelector<HTMLButtonElement>("#showFolderBtn")!;
+  showFolderBtn.addEventListener("click", () => void revealSaveTarget());
+  if (currentIsPdf && currentFile) {
+    // PDF in → redacted PDF out: truly remove the PII (mupdf) + draw the replacements (pdf-lib),
+    // then save bytes. Refuse to save if anything survives re-extraction. Text preview above stays
+    // as the verification UI. (pdf-redact is dynamic-imported so mupdf/pdf-lib stay out of the main bundle.)
+    const pdfFile = currentFile, name = currentName;
+    saveBtn.addEventListener("click", async () => {
+      saveBtn.disabled = true;
+      saveBtn.textContent = COPY.redactingPdf;
+      try {
+        const { redactPdf } = await import("./pdf-redact");
+        const repl = changes.map((c) => ({ original: c.fullOriginal, replacement: c.fullReplaced }));
+        const src = new Uint8Array(await pdfFile.arrayBuffer());
+        const { bytes, survivors } = await redactPdf(src, repl);
+        saveBtn.textContent = COPY.save;
+        if (survivors.length) { diag.error("pdf_redact_survivors", null, { count: survivors.length }); flash(saveBtn, COPY.pdfLeakError); return; }
+        const full = await saveBytesToFolder(name, bytes);
+        if (full) markSaved(saveBtn, showFolderBtn); else downloadBytes(name, bytes);
+      } catch (e) {
+        diag.error("pdf_redact_failed", e);
+        saveBtn.textContent = COPY.save;
+        flash(saveBtn, COPY.pdfLeakError);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+  } else {
+    wireSaveButton(saveBtn, showFolderBtn, currentName, redacted);
+  }
 }
 
 // ───────── run log (privacy-safe: metadata + counts ONLY, never the PII) ─────────
@@ -757,6 +862,7 @@ function showHistoryItem(rec: RunRecord) {
   show("redact");
   screen.classList.add("redacted");
   resultEl.className = "result result--filled";
+  redactMeta = { level: levelLabel(rec.level), mode: modeLabel(rec.mode) };
   resultEl.innerHTML = `
     <div class="inputbar">
       <span class="inputbar__file">📄 ${escapeHtml(rec.file)}</span>
@@ -768,7 +874,7 @@ function showHistoryItem(rec: RunRecord) {
       <div class="result-actions">
         <button class="btn btn--secondary" id="copyBtn">${COPY.copyRedacted}</button>
         <button class="btn btn--secondary" id="saveBtn">${COPY.save}</button>
-        <button class="btn btn--secondary" id="showFolderBtn">${COPY.showInFolder}</button>
+        <button class="btn btn--secondary" id="showFolderBtn" style="display:none">${COPY.showInFolder}</button>
       </div>
     </div>
     <div class="pane pane--output">
@@ -786,8 +892,9 @@ function showHistoryItem(rec: RunRecord) {
     const b = e.currentTarget as HTMLButtonElement;
     try { await navigator.clipboard.writeText(txt); flash(b, COPY.copied); } catch { flash(b, COPY.copyFailed); }
   });
-  wireSaveButton(resultEl.querySelector<HTMLButtonElement>("#saveBtn")!, rec.file, txt);
-  resultEl.querySelector<HTMLButtonElement>("#showFolderBtn")!.addEventListener("click", () => void revealSaveTarget());
+  const histShowFolder = resultEl.querySelector<HTMLButtonElement>("#showFolderBtn")!;
+  histShowFolder.addEventListener("click", () => void revealSaveTarget());
+  wireSaveButton(resultEl.querySelector<HTMLButtonElement>("#saveBtn")!, histShowFolder, rec.file, txt);
 }
 
 function renderHistory() {
@@ -798,7 +905,7 @@ function renderHistory() {
   }
   histList.innerHTML = log.map((r, i) => {
     const when = new Date(r.ts).toLocaleString();
-    const breakdown = Object.entries(r.byType).map(([k, v]) => `${escapeHtml(k)}×${v}`).join(" · ") || "no matches";
+    const breakdown = Object.entries(r.byType).map(([k, v]) => `${escapeHtml(chipLabel(k))}×${v}`).join(" · ") || "no matches";
     const openable = typeof r.redacted === "string" && r.redacted.length > 0;
     return `<div class="hist-item${openable ? " hist-item--open" : ""}" data-i="${i}"${openable ? ' role="button" tabindex="0"' : ""}>
       <div class="hist-item__top"><span class="hist-item__name">${escapeHtml(r.file)}</span><span class="hist-item__date">${escapeHtml(when)}</span></div>

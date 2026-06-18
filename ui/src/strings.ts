@@ -28,6 +28,8 @@ export const COPY = {
   dlRetry: "⤓ Download (retry)",
   dlBadge: "Download",            // dropdown badge for an uninstalled model (was "Get →")
   useModel: "Use this model",     // installed-but-inactive card: click to make it the active model
+  removeModel: "Remove",          // installed card: delete the downloaded weights (arm-twice to confirm)
+  removeArmed: "Click again to remove",
 
   // redact button (phase labels narrate the real pipeline; the mode's own verb comes
   // from the engine MODES registry — each mode owns its busy line like it owns its label)
@@ -60,6 +62,8 @@ export const COPY = {
   save: "Save",
   saved: "Saved ✓",
   showInFolder: "Show in folder",
+  redactingPdf: "🔒 Redacting PDF…",
+  pdfLeakError: "Couldn't fully redact",
   editSettings: "Edit settings",
   newFile: "New file",
 
@@ -76,12 +80,23 @@ export const COPY = {
 
 // Static info-tooltip texts, keyed by the icon's data-tip attribute. Level and mode tips
 // are NOT here — they compose from the engine registries at runtime (single source).
+// Friendly DISPLAY labels for the verification chips. The chip's data-type stays the raw
+// pattern name (the navigation key); chipLabel() only changes what's shown — it strips the
+// "NER:" prefix and maps the cryptic internal names below. Most names are already readable.
+export const CHIP_LABELS: Record<string, string> = {
+  "Custom": "Custom term",
+  "Labeled ID": "ID number",
+  "City/State ZIP": "City and ZIP",
+  "location city": "City",
+  "PER": "Name", "LOC": "Location", "ORG": "Organization",   // BERT entity codes
+};
+
 export const TIPS: Record<string, string> = {
   detection: "The detection method in use. Click to switch it, or open the Models tab to add more.",
   customTerms: "Your own words to always redact: an employer, a nickname, a project name. Separate with commas.",
   seed: "Controls which fake values are used as replacements. Keep it the same to get identical results each run, or regenerate for a different set.",
   saveTo: "The folder where redacted files are saved when you click Save. Change it to any folder you like.",
-  source: "Frisket is open source (MIT).",
+  source: "Frisket is open source (AGPLv3).",
   support: "No donations. A star or a share helps.",
   diagnostics: "A privacy-safe event log: never your document, the matches, or file names. Copy it to report an issue.",
 };

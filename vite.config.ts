@@ -14,5 +14,5 @@ export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   // transformers.js + onnxruntime-web ship their own ESM + wasm; don't let Vite pre-bundle
   // them (it breaks the import.meta.url-based wasm path resolution).
-  optimizeDeps: { exclude: ["@huggingface/transformers", "onnxruntime-web"] },
+  optimizeDeps: { exclude: ["@huggingface/transformers", "onnxruntime-web", "mupdf"] },
 });
