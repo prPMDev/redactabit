@@ -80,6 +80,17 @@ export const COPY = {
 
 // Static info-tooltip texts, keyed by the icon's data-tip attribute. Level and mode tips
 // are NOT here — they compose from the engine registries at runtime (single source).
+// Friendly DISPLAY labels for the verification chips. The chip's data-type stays the raw
+// pattern name (the navigation key); chipLabel() only changes what's shown — it strips the
+// "NER:" prefix and maps the cryptic internal names below. Most names are already readable.
+export const CHIP_LABELS: Record<string, string> = {
+  "Custom": "Custom term",
+  "Labeled ID": "ID number",
+  "City/State ZIP": "City and ZIP",
+  "location city": "City",
+  "PER": "Name", "LOC": "Location", "ORG": "Organization",   // BERT entity codes
+};
+
 export const TIPS: Record<string, string> = {
   detection: "The detection method in use. Click to switch it, or open the Models tab to add more.",
   customTerms: "Your own words to always redact: an employer, a nickname, a project name. Separate with commas.",

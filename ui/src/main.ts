@@ -1,5 +1,5 @@
 import { redactAsync, Faker, LEVELS, MODES, DEFAULT_LEVEL, DEFAULT_MODE, type Mode, type Change, type RedactPhase } from "./engine";
-import { COPY, TIPS } from "./strings";
+import { COPY, TIPS, CHIP_LABELS } from "./strings";
 import { getModels, getBuiltin, getModel, isInstalled, installedModels, subscribe, initCatalog, type ModelDef } from "./catalog";
 import { handlerFor, fileAccept, fileHint } from "./files";
 import * as diag from "./diag";
@@ -51,12 +51,22 @@ async function currentSaveDir(): Promise<string> {
 // Write <name>_redacted.txt into the save folder. Returns the full path, or null when there's
 // no Tauri backend (browser dev) so the caller can fall back to a download. Quiet by design:
 // it never pops the file explorer — revealing is on demand via revealSaveTarget().
+
+// Saved-file naming: <base>_<Level>_<Mode>_redacted.<ext> (issue #4). redactMeta holds the
+// current view's level/mode labels (set at render time), so all four save/download helpers
+// agree — including a reopened history item, which carries its OWN level/mode, not the live controls.
+let redactMeta = { level: "", mode: "" };
+function redactedName(name: string, level: string, mode: string, ext: string): string {
+  const base = name.replace(/\.[^.]+$/, "");
+  const safe = (s: string) => s.replace(/[^A-Za-z0-9]+/g, "");
+  return [base, safe(level), safe(mode), "redacted"].filter(Boolean).join("_") + "." + ext;
+}
 let lastSavedPath: string | null = null;
 async function saveToFolder(name: string, text: string): Promise<string | null> {
   try {
     const { invoke } = await import("@tauri-apps/api/core");
     const { join } = await import("@tauri-apps/api/path");
-    const full = await join(await currentSaveDir(), name.replace(/\.[^.]+$/, "") + "_redacted.txt");
+    const full = await join(await currentSaveDir(), redactedName(name, redactMeta.level, redactMeta.mode, "txt"));
     await invoke("write_text_file", { path: full, contents: text });
     lastSavedPath = full;
     diag.info("file_saved", {});
@@ -98,7 +108,7 @@ async function saveBytesToFolder(name: string, bytes: Uint8Array): Promise<strin
   try {
     const { invoke } = await import("@tauri-apps/api/core");
     const { join } = await import("@tauri-apps/api/path");
-    const full = await join(await currentSaveDir(), name.replace(/\.[^.]+$/, "") + "_redacted.pdf");
+    const full = await join(await currentSaveDir(), redactedName(name, redactMeta.level, redactMeta.mode, "pdf"));
     await invoke("write_bytes_file", { path: full, contents: Array.from(bytes) });
     lastSavedPath = full;
     diag.info("file_saved", { pdf: true });
@@ -111,7 +121,7 @@ async function saveBytesToFolder(name: string, bytes: Uint8Array): Promise<strin
 function downloadBytes(name: string, bytes: Uint8Array) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([bytes as unknown as BlobPart], { type: "application/pdf" }));
-  a.download = name.replace(/\.[^.]+$/, "") + "_redacted.pdf";
+  a.download = redactedName(name, redactMeta.level, redactMeta.mode, "pdf");
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -680,9 +690,17 @@ function downloadText(name: string, text: string) {
   const blob = new Blob([text], { type: "text/plain" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = name.replace(/\.[^.]+$/, "") + "_redacted.txt";
+  a.download = redactedName(name, redactMeta.level, redactMeta.mode, "txt");
   a.click();
   URL.revokeObjectURL(a.href);
+}
+// Humanize a raw pattern name for DISPLAY (result chips + History breakdown): strip the
+// "NER:" prefix, map the cryptic internal names (CHIP_LABELS), capitalize. The raw name stays
+// the key everywhere (chip data-type, byType), so navigation + grouping are unaffected.
+function chipLabel(pattern: string): string {
+  const base = pattern.replace(/^NER:/, "");
+  const friendly = CHIP_LABELS[pattern] ?? CHIP_LABELS[base] ?? base;
+  return friendly.charAt(0).toUpperCase() + friendly.slice(1);
 }
 function renderResult(original: string, redacted: string, changes: Change[]) {
   if (changes.length === 0) {
@@ -693,13 +711,15 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
   }
   resultEl.className = "result result--filled";
   screen.classList.add("redacted");
+  redactMeta = { level: activeLabel(levelGroup), mode: activeLabel(modeGroup) };
   const typeCount = new Set(changes.map((c) => c.pattern)).size;
 
-  // type → count, for the at-a-glance summary chips (scales to any number of items)
+  // type → count, for the at-a-glance summary chips (scales to any number of items).
+  // chipLabel (module-level) humanizes the DISPLAY; data-type keeps the raw name for navigation.
   const counts = new Map<string, number>();
   for (const c of changes) counts.set(c.pattern, (counts.get(c.pattern) ?? 0) + 1);
   const chips = [...counts.entries()]
-    .map(([name, n]) => `<button type="button" class="chip" data-type="${escapeHtml(name)}" title="Find ${escapeHtml(name)} in the output">${escapeHtml(name)}${n > 1 ? ` <span class="chip__n">×${n}</span>` : ""}</button>`).join("");
+    .map(([name, n]) => { const lbl = chipLabel(name); return `<button type="button" class="chip" data-type="${escapeHtml(name)}" title="Find ${escapeHtml(lbl)} in the output">${escapeHtml(lbl)}${n > 1 ? ` <span class="chip__n">×${n}</span>` : ""}</button>`; }).join("");
 
   resultEl.innerHTML = `
     <div class="inputbar">
@@ -842,6 +862,7 @@ function showHistoryItem(rec: RunRecord) {
   show("redact");
   screen.classList.add("redacted");
   resultEl.className = "result result--filled";
+  redactMeta = { level: levelLabel(rec.level), mode: modeLabel(rec.mode) };
   resultEl.innerHTML = `
     <div class="inputbar">
       <span class="inputbar__file">📄 ${escapeHtml(rec.file)}</span>
@@ -884,7 +905,7 @@ function renderHistory() {
   }
   histList.innerHTML = log.map((r, i) => {
     const when = new Date(r.ts).toLocaleString();
-    const breakdown = Object.entries(r.byType).map(([k, v]) => `${escapeHtml(k)}×${v}`).join(" · ") || "no matches";
+    const breakdown = Object.entries(r.byType).map(([k, v]) => `${escapeHtml(chipLabel(k))}×${v}`).join(" · ") || "no matches";
     const openable = typeof r.redacted === "string" && r.redacted.length > 0;
     return `<div class="hist-item${openable ? " hist-item--open" : ""}" data-i="${i}"${openable ? ' role="button" tabindex="0"' : ""}>
       <div class="hist-item__top"><span class="hist-item__name">${escapeHtml(r.file)}</span><span class="hist-item__date">${escapeHtml(when)}</span></div>
