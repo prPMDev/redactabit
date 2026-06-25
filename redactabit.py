@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Frisket — Local, offline document redaction with realistic fake data.
+Redactabit — Local, offline document redaction with realistic fake data.
 
 Upload a PDF or text file, pick your privacy level, and download a clean 
 version with sensitive data replaced by realistic fakes, partial masks, 
 or [REDACTED] tags. Everything runs locally. Nothing leaves your machine.
 
-Run:   python frisket.py
+Run:   python redactabit.py
 Open:  http://localhost:7860
 
 Install: pip install gradio pymupdf  (or: pip install gradio pypdf reportlab)
@@ -48,7 +48,7 @@ class Faker:
     ST_TYPES = ["St","Ave","Dr","Ln","Rd","Ct","Way","Blvd"]
     DOMAINS = ["email.com","mail.net","inbox.org","post.com","letters.net","mailbox.org"]
 
-    def __init__(self, seed="frisket"):
+    def __init__(self, seed="redactabit"):
         self._seed = seed
         self._cache = {}  # (method_name, original_value) → replacement
 
@@ -547,13 +547,13 @@ def build_ui():
         if fpath is None:
             return gr.skip(), "⚠️ Upload a file first.", "", ""
 
-        faker = Faker(seed=seed or "frisket")
+        faker = Faker(seed=seed or "redactabit")
         custom = [t.strip() for t in custom_terms_str.split(',') if t.strip()] if custom_terms_str else []
         level = int(level.split(' ')[0])  # "1 — Light" → 1
 
         ext = Path(fpath).suffix.lower()
         base = Path(fpath).stem
-        out_dir = os.path.join(Path.home(), "Frisket_Output")
+        out_dir = os.path.join(Path.home(), "Redactabit_Output")
         os.makedirs(out_dir, exist_ok=True)
 
         if ext == '.pdf':
@@ -594,7 +594,7 @@ def build_ui():
         if fpath is None:
             return "⚠️ Upload a file first.", "", ""
 
-        faker = Faker(seed=seed or "frisket")
+        faker = Faker(seed=seed or "redactabit")
         custom = [t.strip() for t in custom_terms_str.split(',') if t.strip()] if custom_terms_str else []
         level_int = int(level.split(' ')[0])
 
@@ -626,7 +626,7 @@ def build_ui():
 
         gr.HTML("""
         <div class="main-header">
-            <h1>🔒 Frisket</h1>
+            <h1>🔒 Redactabit</h1>
             <p>Local, offline document redaction. Nothing leaves your machine.</p>
         </div>
         """)
@@ -658,7 +658,7 @@ def build_ui():
 
                 seed = gr.Textbox(
                     label="Seed (optional)",
-                    value="frisket",
+                    value="redactabit",
                     info="Same seed = same fake data each run. Change for different fakes."
                 )
 
@@ -688,7 +688,7 @@ def build_ui():
 
         gr.HTML("""
         <div style="text-align:center;margin-top:16px;font-size:11px;color:#666;">
-            Frisket v1.1 · MIT License · Everything runs locally ·
+            Redactabit v1.1 · MIT License · Everything runs locally ·
             <a href="https://github.com" style="color:#888;">GitHub</a>
         </div>
         """)
@@ -724,12 +724,12 @@ def build_ui():
 # ============================================================
 
 def cli():
-    """Command-line interface for Frisket."""
+    """Command-line interface for Redactabit."""
     import argparse
 
     parser = argparse.ArgumentParser(
-        prog="frisket",
-        description="Frisket — Local, offline document redaction.",
+        prog="redactabit",
+        description="Redactabit — Local, offline document redaction.",
         epilog="Nothing leaves your machine.",
     )
     parser.add_argument("input", help="Input PDF or text file")
@@ -739,7 +739,7 @@ def cli():
                         help="Redaction level: 1=light, 2=standard (default), 3=heavy")
     parser.add_argument("-m", "--mode", choices=["fake", "mask", "redact"], default="fake",
                         help="Replacement mode (default: fake)")
-    parser.add_argument("-s", "--seed", default="frisket",
+    parser.add_argument("-s", "--seed", default="redactabit",
                         help="Faker seed for reproducibility")
     parser.add_argument("-c", "--custom", default="",
                         help="Comma-separated custom terms to redact")
@@ -769,7 +769,7 @@ def cli():
     custom = [t.strip() for t in args.custom.split(',') if t.strip()] if args.custom else []
     faker = Faker(seed=args.seed)
 
-    print(f"\n  Frisket v{__version__}")
+    print(f"\n  Redactabit v{__version__}")
     print(f"  Input:  {input_path}")
     print(f"  Output: {output_path}")
     print(f"  Level:  {args.level}  Mode: {args.mode}  Seed: {args.seed}")
@@ -861,7 +861,7 @@ def launch_ui():
         server_port=7860,
         show_error=True,
         share=False,
-        allowed_paths=[tempfile.gettempdir(), os.path.join(Path.home(), "Frisket_Output")],
+        allowed_paths=[tempfile.gettempdir(), os.path.join(Path.home(), "Redactabit_Output")],
     )
     try:
         launch_kwargs["theme"] = gr.themes.Base(

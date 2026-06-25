@@ -1155,7 +1155,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "frisket"
+name = "redactabit"
 version = "0.2.0"
 dependencies = [
  "log",

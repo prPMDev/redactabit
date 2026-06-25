@@ -10,8 +10,8 @@ __pycache__/
 venv/
 env/
 
-# Frisket output — may contain real redacted documents
-Frisket_Output/
+# Redactabit output — may contain real redacted documents
+Redactabit_Output/
 
 # Local test artifacts
 sample_redacted.*
@@ -28,6 +28,7 @@ Thumbs.db
 # Local-only planning docs (kept on disk, never published)
 DECISIONS.md
 PRD.md
+BRANDINGRESEARCH.md
 
 # Local working docs (design, planning) - never published. Anchored to the repo root so the
 # public docs site at site/docs/ still tracks.

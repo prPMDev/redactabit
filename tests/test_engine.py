@@ -1,5 +1,5 @@
 """
-Comprehensive tests for the Frisket engine.
+Comprehensive tests for the Redactabit engine.
 
 Categories:
   - TestPatternPositive:  Every pattern has at least one positive match
@@ -21,14 +21,14 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from frisket import (
+from redactabit import (
     redact, Faker, PATTERNS, Pat,
     _mask_ssn, _mask_phone, _mask_email, _mask_acct, _mask_card, _mask_name,
     process_pdf, process_text_file,
 )
 
 try:
-    from frisket import process_pdf_pymupdf
+    from redactabit import process_pdf_pymupdf
 except ImportError:
     pass
 
@@ -523,7 +523,7 @@ class TestDeterminism:
         fake_name = parts[0].strip()  # e.g., "Dorothy Young is here"
         # The fake name should appear 3 times
         # Find what John Smith was replaced with
-        _, chgs = redact(text, level=2, mode="fake", faker=Faker("frisket"), custom_terms=["John Smith"])
+        _, chgs = redact(text, level=2, mode="fake", faker=Faker("redactabit"), custom_terms=["John Smith"])
         custom_repls = [c["replaced"] for c in chgs if c["pattern"] == "Custom"]
         assert len(set(custom_repls)) == 1, f"Expected 1 unique replacement, got {set(custom_repls)}"
 

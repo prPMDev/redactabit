@@ -296,7 +296,7 @@ export class GLiNERDetector implements Detector {
 
 /** Fetch the ONNX weights: local bundle, else the Cache API copy, else HF — then PERSIST the
  *  download in the Cache API so a restart never re-pulls ~200 MB from throttled HF. */
-const MODEL_CACHE = "frisket-models-v1";
+const MODEL_CACHE = "redactabit-models-v1";
 // Single source of truth for a model's weights URL — fetch + remove must agree on the cache key.
 const modelUrlOf = (src: GlinerModelSource): string => src.modelUrl ?? `https://huggingface.co/${src.repo}/resolve/main/${src.file}`;
 

@@ -1,4 +1,4 @@
-/* Frisket base + components. All values reference tokens.css. */
+/* Redactabit base + components. All values reference tokens.css. */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans);

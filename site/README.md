@@ -1,6 +1,6 @@
-# Frisket — landing page (`site/`)
+# Redactabit — landing page (`site/`)
 
-The marketing page for Frisket, hosted on GitHub Pages. One static page, no build step, no
+The marketing page for Redactabit, hosted on GitHub Pages. One static page, no build step, no
 framework. **Zero analytics, zero third-party trackers, zero CDN fonts — everything is
 self-hosted.** A privacy tool's own site has to practice what it preaches.
 
@@ -18,7 +18,7 @@ site/
 ## `models.json` — the app's model catalog (not part of the page)
 
 `models.json` lives here only because GitHub Pages serves it for free at
-`https://prpmdev.github.io/frisket/models.json`. The **desktop app** fetches it at runtime to learn
+`https://prpmdev.github.io/redactabit/models.json`. The **desktop app** fetches it at runtime to learn
 which detection models exist and where to download their weights — editing it updates installed apps
 **without a new app release** ("update the URL, not the release"). It is a data file, not landing-page
 content: leave it out of any restyle, and don't delete or rename it. The schema + rationale live in
@@ -45,7 +45,7 @@ Publishing is handled by [`.github/workflows/pages.yml`](../.github/workflows/pa
 uploads `site/` as the Pages artifact on every push to `main` that touches `site/`.
 
 One-time setup: **repo → Settings → Pages → Build and deployment → Source → "GitHub Actions."**
-After that, pushes auto-publish to `https://prpmdev.github.io/frisket/`.
+After that, pushes auto-publish to `https://prpmdev.github.io/redactabit/`.
 
 ### Moving to Cloudflare Pages later
 
@@ -54,7 +54,7 @@ repo, set **build command** empty and **output directory** to `site`. Done.
 
 ## TODOs
 
-- **Download buttons** point at `…/frisket/releases` for now. Once installers are published,
+- **Download buttons** point at `…/redactabit/releases` for now. Once installers are published,
   point "Download for Windows" at the direct `.msi`/NSIS asset (or `…/releases/latest`). See the
   `TODO` comment in `index.html`.
 - **Demo clip:** the before → after panel is a static placeholder. Record a short screen capture

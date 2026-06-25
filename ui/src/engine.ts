@@ -1,4 +1,4 @@
-// Frisket redaction engine — faithful TypeScript port of frisket.py.
+// Redactabit redaction engine — faithful TypeScript port of redactabit.py.
 // Pure logic (regex + string ops); runs entirely in the webview. Nothing leaves the machine.
 //
 // Determinism: Python used SHA-256 -> random.Random. Here we use a synchronous
@@ -62,7 +62,7 @@ interface Rng {
   uniform: (a: number, b: number) => number;
 }
 
-// ── Faker (port of frisket.py Faker) ─────────────────────────
+// ── Faker (port of redactabit.py Faker) ─────────────────────────
 const FIRSTS = ["James","Maria","Robert","Linda","David","Sarah","Michael","Jennifer","William","Patricia","Richard","Elizabeth","Thomas","Susan","Daniel","Karen","Joseph","Nancy","Charles","Betty","Matthew","Dorothy","Andrew","Margaret"];
 const LASTS = ["Anderson","Martinez","Thompson","Garcia","Robinson","Wilson","Clark","Lewis","Walker","Hall","Young","King","Wright","Green","Baker","Hill","Nelson","Carter"];
 const STREETS = ["Maple","Oak","Cedar","Pine","Elm","Washington","Park","Lake","Sunset","River","Spring","Forest","Valley","Meadow","Ridge","Birch","Willow","Cherry"];
@@ -73,7 +73,7 @@ const UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 export class Faker {
   private seed: string;
   private cache = new Map<string, string>();
-  constructor(seed = "frisket") { this.seed = seed; }
+  constructor(seed = "redactabit") { this.seed = seed; }
 
   private r(orig: string): Rng {
     const next = mulberry32(cyrb53(`${this.seed}:${orig}`));
@@ -123,7 +123,7 @@ export class Faker {
   }
 }
 
-// ── Masks (port of frisket.py) ───────────────────────────────
+// ── Masks (port of redactabit.py) ───────────────────────────────
 const digits = (o: string) => o.replace(/\D/g, "");
 const maskSsn: MaskFn = (o) => { const d = digits(o); return d.length >= 4 ? `XXX-XX-${d.slice(-4)}` : "XXX-XX-XXXX"; };
 const maskPhone: MaskFn = (o) => { const d = digits(o); return d.length >= 4 ? `(XXX) XXX-${d.slice(-4)}` : "(XXX) XXX-XXXX"; };
@@ -134,7 +134,7 @@ const maskPan: MaskFn = (o) => { const s = o.trim(); return s.length >= 4 ? "X".
 const maskName: MaskFn = (o) => o.trim().split(/\s+/).filter(Boolean).map((w) => w[0] + ".").join(" ");
 const maskId: MaskFn = (o) => { const v = o.replace(/^[#\s:]+/, ""); return v.length >= 4 ? `# ${"X".repeat(v.length - 4)}${v.slice(-4)}` : "# XXXX"; };
 
-// ── Patterns (port of frisket.py PATTERNS; names/levels/priorities preserved) ──
+// ── Patterns (port of redactabit.py PATTERNS; names/levels/priorities preserved) ──
 const PATTERNS: Pat[] = [
   // Level 1
   { name: "ITIN", regex: /\b9\d{2}-\d{2}-\d{4}\b/g, tag: "[ITIN REDACTED]", fake: "itin", mask: maskSsn, level: 1, priority: 100 },
@@ -158,7 +158,7 @@ const PATTERNS: Pat[] = [
   { name: "Phone", regex: /(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, tag: "[PHONE REDACTED]", fake: "phone", mask: maskPhone, level: 2, priority: 50 },
   { name: "Email", regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/gi, tag: "[EMAIL REDACTED]", fake: "email", mask: maskEmail, level: 2, priority: 60 },
   // Case-sensitive (no /i) + [^\S\n] (not \s) so ALL-CAPS headers can't pose as streets
-  // and a match can't span newlines to swallow a loose number + the next line. Mirrors frisket.py.
+  // and a match can't span newlines to swallow a loose number + the next line. Mirrors redactabit.py.
   { name: "Street Address", regex: /\b\d{1,6}[^\S\n]+(?:[A-Z][a-z]+[^\S\n]*){1,4}(?:St|Street|Ave|Avenue|Blvd|Boulevard|Dr|Drive|Ln|Lane|Rd|Road|Ct|Court|Way|Pl|Place|Cir|Circle|Ter|Terrace|Pkwy|Parkway|Hwy|Highway|Plaza|Sq|Square|Trl|Trail|Loop)\b\.?/g, tag: "[ADDRESS REDACTED]", fake: "street", mask: null, level: 2, priority: 40 },
   // ALL-CAPS variant (statements print mail blocks in caps: "742 EVERGREEN TERRACE").
   // Caps words + a standalone caps suffix token — still case-sensitive, so prose can't
@@ -314,7 +314,7 @@ function resolve(text: string, raw: RawMatch[], mode: Mode, fk: Faker): RedactRe
 
 /**
  * Synchronous redaction — regex + custom terms only (tests/CLI parity).
- * Single-pass port of frisket.py redact(). Signature + output unchanged.
+ * Single-pass port of redactabit.py redact(). Signature + output unchanged.
  */
 export function redact(
   text: string,

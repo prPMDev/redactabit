@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Docs — Frisket</title>
-  <meta name="description" content="How Frisket works: redaction levels, replacement modes, what it detects, the optional local models, and the privacy guarantee." />
+  <title>Docs — Redactabit</title>
+  <meta name="description" content="How Redactabit works: redaction levels, replacement modes, what it detects, the optional local models, and the privacy guarantee." />
   <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
   <meta name="color-scheme" content="light dark" />
@@ -19,21 +19,21 @@
   <!-- ===== Nav (same chrome as the landing page) ===== -->
   <header class="site-header">
     <div class="container nav">
-      <a class="brand" href="../" aria-label="Frisket home">
+      <a class="brand" href="../" aria-label="Redactabit home">
         <span class="bar" aria-hidden="true"></span>
-        <span class="name">Frisket</span>
+        <span class="name">Redactabit</span>
       </a>
       <nav class="nav__links" aria-label="Primary">
         <a href="../#download">Download</a>
         <a href="../#how">How it works</a>
         <a href="./">Docs</a>
-        <a href="https://github.com/prPMDev/frisket">GitHub</a>
+        <a href="https://github.com/prPMDev/redactabit">GitHub</a>
       </nav>
       <div class="nav__right">
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="Color theme: System">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>
         </button>
-        <a class="btn btn--secondary btn--sm" href="https://github.com/prPMDev/frisket" aria-label="Star Frisket on GitHub">
+        <a class="btn btn--secondary btn--sm" href="https://github.com/prPMDev/redactabit" aria-label="Star Redactabit on GitHub">
           <span aria-hidden="true">★</span> Star on GitHub
         </a>
       </div>
@@ -59,23 +59,23 @@
 
       <!-- ===== Content ===== -->
       <article class="docs-content">
-        <h1>Frisket documentation</h1>
-        <p class="lead">Frisket swaps the personal details in a document for realistic fakes, so the file still reads normally and the numbers still add up. Everything runs on your own machine.</p>
+        <h1>Redactabit documentation</h1>
+        <p class="lead">Redactabit swaps the personal details in a document for realistic fakes, so the file still reads normally and the numbers still add up. Everything runs on your own machine.</p>
 
         <section id="getting-started">
           <h2>Getting started</h2>
-          <p>There are two ways to run Frisket today.</p>
+          <p>There are two ways to run Redactabit today.</p>
 
           <h3>Python tool <span class="muted">(works now)</span></h3>
           <p>The engine runs anywhere Python does, with a browser UI or straight from the command line.</p>
 <pre><code>pip install gradio pymupdf
-python frisket.py                 # opens the UI at http://localhost:7860
-python frisket.py statement.pdf -l 2 -m fake   # or run it headless</code></pre>
+python redactabit.py                 # opens the UI at http://localhost:7860
+python redactabit.py statement.pdf -l 2 -m fake   # or run it headless</code></pre>
 
           <h3>Desktop app</h3>
-          <p>The one-click desktop app bundles the redactor and the optional models, with no Python needed. Prebuilt installers are coming to the <a href="https://github.com/prPMDev/frisket/releases">Releases page</a>; until then you can build it from source:</p>
-<pre><code>git clone https://github.com/prPMDev/frisket.git
-cd frisket
+          <p>The one-click desktop app bundles the redactor and the optional models, with no Python needed. Prebuilt installers are coming to the <a href="https://github.com/prPMDev/redactabit/releases">Releases page</a>; until then you can build it from source:</p>
+<pre><code>git clone https://github.com/prPMDev/redactabit.git
+cd redactabit
 npm install &amp;&amp; npm run tauri build   # installers land in src-tauri/target/release/bundle/</code></pre>
 
           <h3>Your first redaction</h3>
@@ -84,7 +84,7 @@ npm install &amp;&amp; npm run tauri build   # installers land in src-tauri/targ
 
         <section id="how-it-works">
           <h2>How it works</h2>
-          <p>A <strong>level</strong> decides how much Frisket removes; a <strong>mode</strong> decides what the removed values are replaced with.</p>
+          <p>A <strong>level</strong> decides how much Redactabit removes; a <strong>mode</strong> decides what the removed values are replaced with.</p>
 
           <h3 id="levels">Levels</h3>
           <p>Standard is the default — it removes what identifies you and keeps the figures, so the document still makes sense.</p>
@@ -139,18 +139,18 @@ npm install &amp;&amp; npm run tauri build   # installers land in src-tauri/targ
 
         <section id="privacy">
           <h2>Privacy</h2>
-          <p>Your document stays on your computer. Frisket doesn't upload your file, ask you to sign in, or phone home. The Python UI listens on <code>127.0.0.1</code> only, so nothing else on your network can reach it.</p>
-          <p>The optional models download once, and after that the whole thing runs with the Wi-Fi off — the airplane-mode test. Frisket is open source (AGPL-3.0), so you can <a href="https://github.com/prPMDev/frisket">read the code</a> and confirm all of this for yourself.</p>
+          <p>Your document stays on your computer. Redactabit doesn't upload your file, ask you to sign in, or phone home. The Python UI listens on <code>127.0.0.1</code> only, so nothing else on your network can reach it.</p>
+          <p>The optional models download once, and after that the whole thing runs with the Wi-Fi off — the airplane-mode test. Redactabit is open source (AGPL-3.0), so you can <a href="https://github.com/prPMDev/redactabit">read the code</a> and confirm all of this for yourself.</p>
         </section>
 
         <section id="faq">
           <h2>FAQ</h2>
 
           <h3>Does it really work offline?</h3>
-          <p>Yes. The redaction engine needs no network at all. The optional models download once; after that you can pull the plug and Frisket still works.</p>
+          <p>Yes. The redaction engine needs no network at all. The optional models download once; after that you can pull the plug and Redactabit still works.</p>
 
           <h3>Does it read scanned documents?</h3>
-          <p>Not yet. Frisket needs a real text layer, so a scanned PDF with no embedded text won't work. OCR is on the list.</p>
+          <p>Not yet. Redactabit needs a real text layer, so a scanned PDF with no embedded text won't work. OCR is on the list.</p>
 
           <h3>Which files can I use?</h3>
           <p>PDF, and text files: <code>.txt</code>, <code>.csv</code>, <code>.md</code>, <code>.json</code>, <code>.xml</code>, <code>.html</code>.</p>
@@ -174,9 +174,9 @@ npm install &amp;&amp; npm run tauri build   # installers land in src-tauri/targ
       <div class="footer-links">
         <span>Built by <a href="https://github.com/prPMDev">prPMDev</a></span>
         <span class="sep" aria-hidden="true">·</span>
-        <a href="https://github.com/prPMDev/frisket/blob/main/LICENSE">AGPL-3.0</a>
+        <a href="https://github.com/prPMDev/redactabit/blob/main/LICENSE">AGPL-3.0</a>
         <span class="sep" aria-hidden="true">·</span>
-        <a href="https://github.com/prPMDev/frisket">GitHub</a>
+        <a href="https://github.com/prPMDev/redactabit">GitHub</a>
       </div>
       <p class="footer-creed"><b>No analytics. No trackers. No CDNs.</b> This page is as private as the app.</p>
     </div>

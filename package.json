@@ -1,10 +1,10 @@
 {
-  "name": "frisket",
+  "name": "redactabit",
   "version": "0.2.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
-  "description": "Frisket — local, offline document redaction. Nothing leaves your machine.",
+  "description": "Redactabit — local, offline document redaction. Nothing leaves your machine.",
   "scripts": {
     "sync-seed": "node scripts/sync-seed.mjs",
     "predev": "node scripts/sync-seed.mjs",

@@ -8,7 +8,7 @@ import * as diag from "./diag";
 // Links and blob-downloads don't behave like a browser in WebView2, so URLs/folders go
 // through the Tauri opener plugin and diagnostics copy to the clipboard. Everything is
 // dynamically imported with a fallback so the plain browser build (npm run dev) still works.
-const REPO_URL = "https://github.com/prPMDev/frisket";
+const REPO_URL = "https://github.com/prPMDev/redactabit";
 
 // Version spans (About + statusbar) fill from the single source (package.json via Vite define).
 document.querySelectorAll<HTMLElement>("[data-version]").forEach((el) => { el.textContent = `v${__APP_VERSION__}`; });
@@ -37,13 +37,13 @@ async function openAppDir(which: "data" | "log") {
 
 // ───────── save redacted files to a real folder (Tauri) ─────────
 // In the packaged app, "Save" writes the redacted text to a user-chosen folder via a tiny Rust
-// command and reveals it; the folder defaults to <Downloads>/Frisket and is remembered. In the
+// command and reveals it; the folder defaults to <Downloads>/Redactabit and is remembered. In the
 // plain browser build (npm run dev) there's no Tauri backend, so each step throws and callers
 // fall back to the blob download — same airplane-mode-safe, dynamic-import pattern as the opens.
-const SAVE_DIR_KEY = "frisket.saveDir.v1";
+const SAVE_DIR_KEY = "redactabit.saveDir.v1";
 async function defaultSaveDir(): Promise<string> {
   const { downloadDir, join } = await import("@tauri-apps/api/path");
-  return await join(await downloadDir(), "Frisket");
+  return await join(await downloadDir(), "Redactabit");
 }
 async function currentSaveDir(): Promise<string> {
   return localStorage.getItem(SAVE_DIR_KEY) || (await defaultSaveDir());
@@ -130,7 +130,7 @@ function downloadBytes(name: string, bytes: Uint8Array) {
 const saveDirInput = document.querySelector<HTMLInputElement>("#saveDirInput");
 async function refreshSaveDirInput() {
   if (!saveDirInput) return;
-  try { saveDirInput.value = await currentSaveDir(); } catch { saveDirInput.value = "Downloads/Frisket"; }
+  try { saveDirInput.value = await currentSaveDir(); } catch { saveDirInput.value = "Downloads/Redactabit"; }
 }
 void refreshSaveDirInput();
 document.querySelector<HTMLButtonElement>("#pickSaveDir")?.addEventListener("click", async () => {
@@ -296,7 +296,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") hideTip(tr
 
 // ───────── preferences: remember last-used level/mode + fake-data set ─────────
 // (one source of truth: the Redact screen; Advanced no longer duplicates these)
-const PREF_KEY = "frisket.prefs.v1";
+const PREF_KEY = "redactabit.prefs.v1";
 const seedInput = document.querySelector<HTMLInputElement>("#seedInput");
 function setSegmentedValue(group: HTMLElement, label: string) {
   group.querySelectorAll<HTMLButtonElement>("button").forEach((b) =>
@@ -304,7 +304,7 @@ function setSegmentedValue(group: HTMLElement, label: string) {
 }
 function savePrefs() {
   localStorage.setItem(PREF_KEY, JSON.stringify({
-    level: activeLabel(levelGroup), mode: activeLabel(modeGroup), seed: seedInput?.value || "frisket",
+    level: activeLabel(levelGroup), mode: activeLabel(modeGroup), seed: seedInput?.value || "redactabit",
   }));
 }
 (function loadPrefs() {
@@ -454,7 +454,7 @@ redactBtn.addEventListener("click", async () => {
       }
     : undefined;
   try {
-    const { text, changes } = await redactAsync(currentText, level, mode, custom, new Faker(seedInput?.value || "frisket"), extra, onProgress);
+    const { text, changes } = await redactAsync(currentText, level, mode, custom, new Faker(seedInput?.value || "redactabit"), extra, onProgress);
     if (showProgress) {                                             // let the narration + fill finish on screen
       setRedactProgress(1);
       while (phaseDraining) await new Promise((r) => setTimeout(r, 60));
@@ -489,16 +489,16 @@ if (baseTxt) baseTxt.textContent = getBuiltin().card.desc;
 if (baseTag) baseTag.textContent = getBuiltin().card.size;
 
 // One smart model is active at a time (Handy-style); built-in rules are always the floor.
-// Stored in "frisket.detect.active" (a model id, or BUILTIN.id for rules-only).
+// Stored in "redactabit.detect.active" (a model id, or BUILTIN.id for rules-only).
 function activeModel(): string {
-  const a = localStorage.getItem("frisket.detect.active");
+  const a = localStorage.getItem("redactabit.detect.active");
   if (a === getBuiltin().id) return getBuiltin().id;
   const def = a ? getModel(a) : undefined;
   if (def && isInstalled(def)) return def.id;
   return installedModels()[0]?.id ?? getBuiltin().id; // default: the installed model, else rules-only
 }
 function setActiveModel(id: string) {
-  localStorage.setItem("frisket.detect.active", id);
+  localStorage.setItem("redactabit.detect.active", id);
   renderModelChip();
   placeModelCards();
 }
@@ -831,7 +831,7 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
 }
 
 // ───────── run log (privacy-safe: metadata + counts ONLY, never the PII) ─────────
-const LOG_KEY = "frisket.runs.v1";
+const LOG_KEY = "redactabit.runs.v1";
 interface RunRecord { ts: string; file: string; chars: number; level: number; mode: Mode; total: number; byType: Record<string, number>; redacted?: string; }
 
 function readLog(): RunRecord[] {
@@ -924,7 +924,7 @@ document.querySelector<HTMLButtonElement>("#exportLog")?.addEventListener("click
   const blob = new Blob([JSON.stringify(readLog(), null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "frisket-log.json";
+  a.download = "redactabit-log.json";
   a.click();
   URL.revokeObjectURL(a.href);
 });

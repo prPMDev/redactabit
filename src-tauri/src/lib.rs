@@ -40,7 +40,7 @@ pub fn run() {
           .level(log::LevelFilter::Info)
           .build(),
       )?;
-      log::info!("Frisket {} started", env!("CARGO_PKG_VERSION"));
+      log::info!("Redactabit {} started", env!("CARGO_PKG_VERSION"));
       Ok(())
     })
     .run(tauri::generate_context!())

@@ -4,7 +4,7 @@
 // error messages/stacks (capped), counts, timings, versions, and environment. Nothing
 // is sent anywhere; export is user-initiated (clipboard, via diagnosticsText).
 
-const KEY = "frisket.diag.v1";
+const KEY = "redactabit.diag.v1";
 const CAP = 300; // ring buffer: keep the most recent N entries
 // Injected by Vite define; the typeof guard keeps plain-node runs (tests) safe.
 const VERSION = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "dev";
@@ -55,7 +55,7 @@ export function error(event: string, err: unknown, data?: Record<string, unknown
 export function diagnosticsText(): string {
   flush(); // make storage + report consistent with what's in memory
   const report = {
-    app: "Frisket",
+    app: "Redactabit",
     version: VERSION,
     exportedAt: new Date().toISOString(),
     env: {

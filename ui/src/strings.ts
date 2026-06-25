@@ -96,7 +96,7 @@ export const TIPS: Record<string, string> = {
   customTerms: "Your own words to always redact: an employer, a nickname, a project name. Separate with commas.",
   seed: "Controls which fake values are used as replacements. Keep it the same to get identical results each run, or regenerate for a different set.",
   saveTo: "The folder where redacted files are saved when you click Save. Change it to any folder you like.",
-  source: "Frisket is open source (AGPLv3).",
+  source: "Redactabit is open source (AGPLv3).",
   support: "No donations. A star or a share helps.",
   diagnostics: "A privacy-safe event log: never your document, the matches, or file names. Copy it to report an issue.",
 };

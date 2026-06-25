@@ -1,4 +1,4 @@
-/* Frisket landing — progressive enhancements (local-only, no network).
+/* Redactabit landing — progressive enhancements (local-only, no network).
  * Progressive enhancement: relabel the primary download button to the visitor's OS.
  * Pure local navigator sniffing — no network, no third parties. The page is fully
  * functional (and defaults to Windows) with JS disabled.

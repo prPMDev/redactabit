@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Frisket",
+  "productName": "Redactabit",
   "version": "0.2.0",
-  "identifier": "com.frisket.app",
+  "identifier": "com.redactabit.app",
   "build": {
     "frontendDist": "../ui/dist",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Frisket",
+        "title": "Redactabit",
         "width": 1000,
         "height": 720,
         "minWidth": 880,

@@ -1,14 +1,14 @@
-# CLAUDE.md — Frisket
+# CLAUDE.md — Redactabit
 
 ## Project Overview
 
-Frisket is a local, offline document redaction tool. It strips sensitive PII from PDFs and text files, replacing matches with realistic fake data, partial masks, or [REDACTED] tags. Gradio-based browser UI. Single-file Python architecture. MIT licensed.
+Redactabit is a local, offline document redaction tool. It strips sensitive PII from PDFs and text files, replacing matches with realistic fake data, partial masks, or [REDACTED] tags. Gradio-based browser UI. Single-file Python architecture. MIT licensed.
 
 **Core value prop:** "Nothing leaves your machine." This is not a SaaS product. It runs entirely locally. This principle is non-negotiable in all design decisions.
 
 ## Architecture
 
-Single-file: `frisket.py` contains everything — engine, patterns, faker, file processors, and Gradio UI.
+Single-file: `redactabit.py` contains everything — engine, patterns, faker, file processors, and Gradio UI.
 
 ### Key Components
 
@@ -63,16 +63,16 @@ Stdlib only for the engine itself (`re`, `random`, `hashlib`, `dataclasses`). Th
 
 ```bash
 # Run the app
-python frisket.py
+python redactabit.py
 
 # Run tests
 pytest tests/ -v
 
 # Run tests with coverage
-pytest tests/ --cov=frisket --cov-report=term-missing
+pytest tests/ --cov=redactabit --cov-report=term-missing
 
 # Quick engine smoke test
-python -c "from frisket import redact; print(redact('SSN: 123-45-6789', level=2, mode='fake'))"
+python -c "from redactabit import redact; print(redact('SSN: 123-45-6789', level=2, mode='fake'))"
 ```
 
 ## Gradio Compatibility

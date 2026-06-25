@@ -18,7 +18,7 @@ import seed from "./models.seed.json";
 import * as diag from "./diag";
 
 // The one bootstrap constant: where the live manifest lives. (Allowed in tauri.conf.json CSP.)
-const MANIFEST_URL = "https://prpmdev.github.io/frisket/models.json";
+const MANIFEST_URL = "https://prpmdev.github.io/redactabit/models.json";
 
 // ── manifest shape (the JSON contract) ──
 interface ManifestSource {
@@ -108,7 +108,7 @@ function buildModelDef(e: ManifestEntry): ModelDef {
   return {
     id: e.id,
     detector: new GLiNERDetector(source),
-    storeKey: `frisket.model.${e.id}.v1`, // derived, not stored per-entry
+    storeKey: `redactabit.model.${e.id}.v1`, // derived, not stored per-entry
     available: e.available ?? true,
     chip: e.chip,
     card: e.card,

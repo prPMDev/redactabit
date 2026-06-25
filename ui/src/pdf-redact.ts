@@ -1,7 +1,7 @@
 // True PDF redaction: mupdf REMOVES the PII (the safety), pdf-lib DRAWS the replacement (the
 // visual). mupdf.js Redact annotations can't draw replacement text, so we split the job —
 // mupdf for content-stream removal (proven in the Phase-2 spike), pdf-lib (MIT) for a white box
-// + Helvetica replacement, mirroring the legacy frisket.py PyMuPDF behavior (frisket.py:468-487).
+// + Helvetica replacement, mirroring the legacy redactabit.py PyMuPDF behavior (redactabit.py:468-487).
 // main.ts dynamic-imports this module only on a PDF save, so mupdf/pdf-lib stay out of the main
 // bundle; mupdf itself is dynamic-imported here (it loads its own wasm).
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
