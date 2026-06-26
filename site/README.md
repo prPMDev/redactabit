@@ -1,6 +1,6 @@
 # Redactabit — landing page (`site/`)
 
-The marketing page for Redactabit, hosted on GitHub Pages. One static page, no build step, no
+The marketing page for Redactabit, hosted on Cloudflare Pages. One static page, no build step, no
 framework. **Zero analytics, zero third-party trackers, zero CDN fonts — everything is
 self-hosted.** A privacy tool's own site has to practice what it preaches.
 
@@ -17,8 +17,8 @@ site/
 
 ## `models.json` — the app's model catalog (not part of the page)
 
-`models.json` lives here only because GitHub Pages serves it for free at
-`https://prpmdev.github.io/redactabit/models.json`. The **desktop app** fetches it at runtime to learn
+`models.json` lives here only because Cloudflare Pages serves it for free at
+`https://redactabit.com/models.json`. The **desktop app** fetches it at runtime to learn
 which detection models exist and where to download their weights — editing it updates installed apps
 **without a new app release** ("update the URL, not the release"). It is a data file, not landing-page
 content: leave it out of any restyle, and don't delete or rename it. The schema + rationale live in
@@ -39,18 +39,18 @@ cd site && python -m http.server 8000   # then visit http://localhost:8000
 same-origin (the HTML, CSS, JS, SVG — nothing else). Then go offline and reload; the page should
 render exactly the same.
 
-## Deploy (GitHub Pages)
+## Deploy (Cloudflare Pages)
 
-Publishing is handled by [`.github/workflows/pages.yml`](../.github/workflows/pages.yml), which
-uploads `site/` as the Pages artifact on every push to `main` that touches `site/`.
+Hosted on Cloudflare Pages, connected to this repo. One-time setup in the Cloudflare dashboard:
 
-One-time setup: **repo → Settings → Pages → Build and deployment → Source → "GitHub Actions."**
-After that, pushes auto-publish to `https://prpmdev.github.io/redactabit/`.
+1. **Workers & Pages → Create → Pages → Connect to Git →** pick this repo (works with a **private** repo).
+2. **Build command:** *(empty)* · **Build output directory:** `site` · **Framework preset:** none.
+3. **Custom domains →** add `redactabit.com` (+ `www`); `_redirects` forwards `www` → apex.
+4. **Web Analytics:** enable it on the project (cookieless, no code, no cookie banner) — this keeps the
+   "zero third-party trackers" promise. Do **not** add Google Analytics here.
 
-### Moving to Cloudflare Pages later
-
-Every path on the page is relative, so nothing needs editing. In Cloudflare Pages: connect the
-repo, set **build command** empty and **output directory** to `site`. Done.
+Pushes to `main` then auto-deploy. `models.json` is served at `https://redactabit.com/models.json`
+— the desktop app's `MANIFEST_URL` (`ui/src/catalog.ts`), also allow-listed in `tauri.conf.json` CSP.
 
 ## TODOs
 

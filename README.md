@@ -4,7 +4,7 @@
 
 Redact-a-bit swaps the personal details in a document for realistic fake ones, so the file still reads normally and the numbers still add up. It runs on your own computer.
 
-[Website](https://prpmdev.github.io/redactabit/) · Local and offline · AGPLv3
+[Website](https://redactabit.com/) · Local and offline · AGPLv3
 
 <!-- Screenshot slot — drop in docs/screenshot-app.png and uncomment -->
 <!-- ![Redact-a-bit](docs/screenshot-app.png) -->
@@ -44,7 +44,7 @@ It handles PDFs and text files (`.txt`, `.csv`, `.md`, `.json`, `.xml`, `.html`)
 
 ## Get Redact-a-bit
 
-Start on the [website](https://prpmdev.github.io/redactabit/). It always points to the current build.
+Start on the [website](https://redactabit.com/). It always points to the current build.
 
 **Desktop app.** [Download for Windows](https://github.com/prPMDev/redactabit/releases/latest) is a single installer (around 50 MB) that runs the redactor and the optional detection models without needing Python. macOS and Linux are coming.
 

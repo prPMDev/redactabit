@@ -1,12 +1,12 @@
 // The runtime model catalog. Model DEFINITIONS are data, not code: they live in a JSON manifest
 // so a model's URL/threshold/labels — or which models exist — can be updated WITHOUT shipping a
-// new app release (edit site/models.json + push; GitHub Pages serves it; installed apps pick it up).
+// new app release (edit site/models.json + push; Cloudflare Pages serves it; installed apps pick it up).
 //
 // Two layers, so the app is offline-first AND remotely updatable:
 //   1. SEED (models.seed.json, imported synchronously) — an instant, always-present catalog at
 //      module load. A build-time copy of site/models.json (see scripts/sync-seed.mjs). This is why
 //      the UI needs no loading state: the catalog is populated before first paint, airplane-mode safe.
-//   2. REMOTE (site/models.json on GitHub Pages) — the canonical, editable source. Fetched
+//   2. REMOTE (site/models.json on Cloudflare Pages, served at redactabit.com) — the canonical, editable source. Fetched
 //      best-effort at boot; on success it overlays the seed and notifies the UI to re-render.
 //
 // What stays in CODE (the minimal hardcoded set): BUILTIN (the always-on regex floor — must survive
@@ -18,7 +18,7 @@ import seed from "./models.seed.json";
 import * as diag from "./diag";
 
 // The one bootstrap constant: where the live manifest lives. (Allowed in tauri.conf.json CSP.)
-const MANIFEST_URL = "https://prpmdev.github.io/redactabit/models.json";
+const MANIFEST_URL = "https://redactabit.com/models.json";
 
 // ── manifest shape (the JSON contract) ──
 interface ManifestSource {

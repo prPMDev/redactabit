@@ -23,7 +23,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; worker-src 'self' blob:; connect-src 'self' ws: https://huggingface.co https://*.huggingface.co https://*.hf.co https://cdn.jsdelivr.net https://prpmdev.github.io"
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; worker-src 'self' blob:; connect-src 'self' ws: https://huggingface.co https://*.huggingface.co https://*.hf.co https://cdn.jsdelivr.net https://redactabit.com"
     }
   },
   "bundle": {

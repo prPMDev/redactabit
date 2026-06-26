@@ -1,0 +1,9 @@
+# Cloudflare Pages redirects. Canonical host = redactabit.com (apex).
+# www -> apex
+https://www.redactabit.com/* https://redactabit.com/:splat 301!
+
+# Defensive TLDs -> primary. Uncomment each once the domain is added to the Pages project:
+# https://redactabit.app/* https://redactabit.com/:splat 301!
+# https://www.redactabit.app/* https://redactabit.com/:splat 301!
+# https://redactabit.dev/* https://redactabit.com/:splat 301!
+# https://www.redactabit.dev/* https://redactabit.com/:splat 301!
