@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Redactabit",
+  "productName": "Redact-a-bit",
   "version": "0.2.0",
   "identifier": "com.redactabit.app",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Redactabit",
+        "title": "Redact-a-bit",
         "width": 1000,
         "height": 720,
         "minWidth": 880,

@@ -24,9 +24,7 @@ button, input { font-family: inherit; }
 .sidebar { width: 212px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border);
   display: flex; flex-direction: column; padding: var(--s-4); gap: var(--s-6); }
 .brand { display: flex; align-items: center; gap: var(--s-3); }
-.brand .bar { width: 28px; height: 18px; border-radius: 4px; background: var(--redacted-bar);
-  position: relative; box-shadow: inset 0 0 0 1px var(--border-strong); flex-shrink: 0; }
-.brand .bar::after { content: ""; position: absolute; inset: 4px 6px; border-radius: 2px; background: var(--primary); }
+.brand-mark { display: block; flex-shrink: 0; }
 .brand .name { font-size: var(--fs-xl); font-weight: var(--fw-semibold); letter-spacing: -.02em; }
 .nav { display: flex; flex-direction: column; gap: 2px; }
 .nav a { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-2) var(--s-3);

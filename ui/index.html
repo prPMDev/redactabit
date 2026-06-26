@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Redactabit</title>
+  <title>Redact-a-bit</title>
   <link rel="stylesheet" href="styles/tokens.css" />
   <link rel="stylesheet" href="styles/app.css" />
 </head>
@@ -13,7 +13,7 @@
       <div class="main">
         <!-- Sidebar -->
         <aside class="sidebar">
-          <div class="brand"><span class="bar"></span><span class="name">Redactabit</span></div>
+          <div class="brand"><svg class="brand-mark" viewBox="0 0 64 80" width="20" height="25" aria-hidden="true"><g fill="currentColor"><rect x="8" y="4" width="30" height="5" rx="2.5"/><rect x="8" y="13" width="40" height="5" rx="2.5"/><rect x="8" y="33" width="24" height="5" rx="2.5"/><rect x="8" y="42" width="16" height="5" rx="2.5"/><rect x="8" y="62" width="44" height="5" rx="2.5"/><rect x="8" y="71" width="52" height="5" rx="2.5"/></g><rect x="8" y="22" width="40" height="8" rx="3" fill="var(--primary,#14b8a6)"/><rect x="8" y="51" width="34" height="8" rx="3" fill="var(--primary,#14b8a6)"/></svg><span class="name">Redact-a-bit</span></div>
           <nav class="nav">
             <a data-nav="redact" class="active"><span class="ic">▮</span> Redact</a>
             <a data-nav="models"><span class="ic">◫</span> Models</a>
@@ -59,7 +59,7 @@
 
           <!-- ===== MODELS ===== -->
           <section class="screen" data-screen="models" style="display:none">
-            <div class="screen-head"><h1>Models</h1><div class="sub">How Redactabit finds sensitive data.</div></div>
+            <div class="screen-head"><h1>Models</h1><div class="sub">How Redact-a-bit finds sensitive data.</div></div>
             <div class="baseline">
               <span class="baseline__on">✓ Always on</span>
               <span class="baseline__txt">Finds SSNs, cards, and accounts.</span>
@@ -87,7 +87,7 @@
               <div><h1>History</h1><div class="sub">Your recent redactions. Click one to reopen it.</div></div>
               <button class="btn btn--secondary" id="exportLog">⤓ Export log</button>
             </div>
-            <div class="note">🔒 History stays on your machine. Redactabit saves the redacted result and a few details so you can reopen a run. Clear it anytime.</div>
+            <div class="note">🔒 History stays on your machine. Redact-a-bit saves the redacted result and a few details so you can reopen a run. Clear it anytime.</div>
             <div class="hist"></div>
             <button class="linkbtn" id="clearHist" style="align-self:flex-start">Clear history</button>
           </section>

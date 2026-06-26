@@ -1,19 +1,19 @@
-# 🔒 Redactabit
+# 🔒 Redact-a-bit
 
 **Mask the personal. Paste the rest.**
 
-Redactabit swaps the personal details in a document for realistic fake ones, so the file still reads normally and the numbers still add up. It runs on your own computer.
+Redact-a-bit swaps the personal details in a document for realistic fake ones, so the file still reads normally and the numbers still add up. It runs on your own computer.
 
 [Website](https://prpmdev.github.io/redactabit/) · Local and offline · AGPLv3
 
 <!-- Screenshot slot — drop in docs/screenshot-app.png and uncomment -->
-<!-- ![Redactabit](docs/screenshot-app.png) -->
+<!-- ![Redact-a-bit](docs/screenshot-app.png) -->
 
 ## Why
 
 You might want to share a bank statement with your accountant, paste a contract into an AI chatbot, or send records to a lawyer. Usually that means exposing your SSN, account numbers, and address right along with it.
 
-Online redaction tools don't really solve it: you upload the very document you were trying to protect. Blunt `[REDACTED]` bars leave the file unreadable. Redactabit swaps the sensitive parts for believable fakes instead, so the document still makes sense and an AI can still work with it. Your real information just isn't in the copy you share.
+Online redaction tools don't really solve it: you upload the very document you were trying to protect. Blunt `[REDACTED]` bars leave the file unreadable. Redact-a-bit swaps the sensitive parts for believable fakes instead, so the document still makes sense and an AI can still work with it. Your real information just isn't in the copy you share.
 
 (The name is just *redact a bit*: take out what identifies you, leave everything else in place.)
 
@@ -42,7 +42,7 @@ Label   482-19-3756  →  [SSN REDACTED]    a plain tag
 
 It handles PDFs and text files (`.txt`, `.csv`, `.md`, `.json`, `.xml`, `.html`). There's no OCR yet, so scanned PDFs need a real text layer.
 
-## Get Redactabit
+## Get Redact-a-bit
 
 Start on the [website](https://prpmdev.github.io/redactabit/). It always points to the current build.
 
@@ -85,6 +85,6 @@ Tests run with `pytest` (the engine) and `npm test` (the desktop engine and dete
 
 ## License
 
-AGPLv3 (`AGPL-3.0-or-later`). See [LICENSE](LICENSE). Redactabit is a passion project I don't intend to monetize, so copyleft is a feature, not a cost: use it, fork it, ship it, and keep your version open too. (True PDF redaction is built on [MuPDF](https://mupdf.com), which is AGPL.)
+AGPLv3 (`AGPL-3.0-or-later`). See [LICENSE](LICENSE). Redact-a-bit is a passion project I don't intend to monetize, so copyleft is a feature, not a cost: use it, fork it, ship it, and keep your version open too. (True PDF redaction is built on [MuPDF](https://mupdf.com), which is AGPL.)
 
 Built by [prPMDev](https://github.com/prPMDev). The detection builds on [GLiNER](https://github.com/urchade/GLiNER) and the desktop app on [Tauri](https://tauri.app). The site borrows its spirit from [Handy](https://handy.computer).

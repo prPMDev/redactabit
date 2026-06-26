@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Redactabit — Local, offline document redaction with realistic fake data.
+Redact-a-bit — Local, offline document redaction with realistic fake data.
 
 Upload a PDF or text file, pick your privacy level, and download a clean 
 version with sensitive data replaced by realistic fakes, partial masks, 
@@ -626,7 +626,7 @@ def build_ui():
 
         gr.HTML("""
         <div class="main-header">
-            <h1>🔒 Redactabit</h1>
+            <h1>🔒 Redact-a-bit</h1>
             <p>Local, offline document redaction. Nothing leaves your machine.</p>
         </div>
         """)
@@ -688,7 +688,7 @@ def build_ui():
 
         gr.HTML("""
         <div style="text-align:center;margin-top:16px;font-size:11px;color:#666;">
-            Redactabit v1.1 · MIT License · Everything runs locally ·
+            Redact-a-bit v1.1 · MIT License · Everything runs locally ·
             <a href="https://github.com" style="color:#888;">GitHub</a>
         </div>
         """)
@@ -724,12 +724,12 @@ def build_ui():
 # ============================================================
 
 def cli():
-    """Command-line interface for Redactabit."""
+    """Command-line interface for Redact-a-bit."""
     import argparse
 
     parser = argparse.ArgumentParser(
         prog="redactabit",
-        description="Redactabit — Local, offline document redaction.",
+        description="Redact-a-bit — Local, offline document redaction.",
         epilog="Nothing leaves your machine.",
     )
     parser.add_argument("input", help="Input PDF or text file")
@@ -769,7 +769,7 @@ def cli():
     custom = [t.strip() for t in args.custom.split(',') if t.strip()] if args.custom else []
     faker = Faker(seed=args.seed)
 
-    print(f"\n  Redactabit v{__version__}")
+    print(f"\n  Redact-a-bit v{__version__}")
     print(f"  Input:  {input_path}")
     print(f"  Output: {output_path}")
     print(f"  Level:  {args.level}  Mode: {args.mode}  Seed: {args.seed}")
