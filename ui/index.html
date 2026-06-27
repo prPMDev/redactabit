@@ -15,11 +15,11 @@
         <aside class="sidebar">
           <div class="brand"><svg class="brand-mark" viewBox="0 0 64 80" width="20" height="25" aria-hidden="true"><g fill="currentColor"><rect x="8" y="4" width="30" height="5" rx="2.5"/><rect x="8" y="13" width="40" height="5" rx="2.5"/><rect x="8" y="33" width="24" height="5" rx="2.5"/><rect x="8" y="42" width="16" height="5" rx="2.5"/><rect x="8" y="62" width="44" height="5" rx="2.5"/><rect x="8" y="71" width="52" height="5" rx="2.5"/></g><rect x="8" y="22" width="40" height="8" rx="3" fill="var(--primary,#14b8a6)"/><rect x="8" y="51" width="34" height="8" rx="3" fill="var(--primary,#14b8a6)"/></svg><span class="name">Redact-a-bit</span></div>
           <nav class="nav">
-            <a data-nav="redact" class="active"><span class="ic">▮</span> Redact</a>
-            <a data-nav="models"><span class="ic">◫</span> Models</a>
-            <a data-nav="history"><span class="ic">◷</span> History</a>
-            <a data-nav="advanced"><span class="ic">⚙</span> Advanced</a>
-            <a data-nav="about"><span class="ic">ⓘ</span> About</a>
+            <a data-nav="redact" class="active" tabindex="0"><span class="ic">▮</span> Redact</a>
+            <a data-nav="models" tabindex="0"><span class="ic">◫</span> Models</a>
+            <a data-nav="history" tabindex="0"><span class="ic">◷</span> History</a>
+            <a data-nav="advanced" tabindex="0"><span class="ic">⚙</span> Advanced</a>
+            <a data-nav="about" tabindex="0"><span class="ic">ⓘ</span> About</a>
           </nav>
         </aside>
 
@@ -76,6 +76,7 @@
           <section class="screen" data-screen="advanced" style="display:none">
             <div class="screen-head"><h1>Advanced</h1><div class="sub">Where redacted files are saved, and how fakes are generated.</div></div>
             <div class="panel">
+              <div class="setrow"><span class="k">Appearance</span><span class="v"><div class="segmented" id="themeSeg" role="group" aria-label="Appearance"></div></span></div>
               <div class="setrow"><span class="k">Fake-data set <i class="info" data-tip="seed" tabindex="0" role="button" aria-label="About the fake-data set">i</i></span><span class="v"><input class="input" id="seedInput" value="redactabit" readonly style="width:140px" /><button class="btn btn--secondary" id="regenSeed">🎲 Regenerate</button></span></div>
               <div class="setrow"><span class="k">Save redacted files to <i class="info" data-tip="saveTo" tabindex="0" role="button" aria-label="About the save location">i</i></span><span class="v"><input class="input input--path" id="saveDirInput" readonly /><button class="btn btn--secondary" id="pickSaveDir">Change…</button><button class="btn btn--secondary" id="openSaveDir">Open</button></span></div>
             </div>

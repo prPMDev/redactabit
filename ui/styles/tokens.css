@@ -12,14 +12,14 @@
   /* ===== Color: text ===== */
   --text: #e7e9ee;
   --text-2: #a3acbd;
-  --text-muted: #6b7383;
+  --text-muted: #7c8492;  /* ≥4.5:1 on --surface (AA for the small meta it's used on) */
 
-  /* ===== Color: accent (teal = "secured") ===== */
-  --primary: #2dd4bf;
-  --primary-hover: #45e3cf;
-  --primary-press: #14b8a6;
+  /* ===== Color: accent (teal = "secured") — calmer, less neon than the original #2dd4bf ===== */
+  --primary: #23c4ac;
+  --primary-hover: #34d6bf;
+  --primary-press: #15a895;
   --on-primary: #04201c;
-  --primary-soft: rgba(45, 212, 191, 0.15);  /* accent wash: focus ring, active pill */
+  --primary-soft: rgba(35, 196, 172, 0.15);  /* accent wash: focus ring, active pill */
 
   /* ===== Color: semantic ===== */
   --success: #34d399;
@@ -28,14 +28,14 @@
   --info: #60a5fa;
 
   /* ===== Color: redaction motif ===== */
-  --redacted: rgba(45, 212, 191, 0.16);  /* fake-data highlight wash */
-  --redacted-ring: rgba(45, 212, 191, 0.45);
+  --redacted: rgba(35, 196, 172, 0.16);  /* fake-data highlight wash */
+  --redacted-ring: rgba(35, 196, 172, 0.45);
   --redacted-bar: #0a0d12;                /* solid black-bar redaction */
 
   /* ===== Typography (system stack → offline, native feel) ===== */
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
-  --fs-xs: 12px; --fs-sm: 13px; --fs-md: 14px; --fs-lg: 16px; --fs-xl: 17px; --fs-2xl: 21px;
+  --fs-2xs: 10px; --fs-xs: 12px; --fs-sm: 13px; --fs-md: 14px; --fs-lg: 16px; --fs-xl: 17px; --fs-2xl: 21px;
   --fw-normal: 400; --fw-medium: 500; --fw-semibold: 600;
   --lh: 1.5;
 
@@ -43,7 +43,7 @@
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px;
 
   /* ===== Radius / Shadow / Motion ===== */
-  --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-full: 9999px;
+  --r-xs: 4px; --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-full: 9999px;
   --shadow-1: 0 1px 2px rgba(0,0,0,.32);
   --shadow-2: 0 12px 32px rgba(0,0,0,.46);
   --dur: 160ms; --ease: cubic-bezier(.2,.6,.2,1);
