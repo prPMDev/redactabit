@@ -48,7 +48,7 @@ Start on the [website](https://redactabit.com/). It always points to the current
 
 **Desktop app.** [Download for Windows](https://github.com/prPMDev/redactabit/releases/latest) is a single installer (around 50 MB) that runs the redactor and the optional detection models without needing Python. macOS and Linux are coming.
 
-**Python version**, which works today:
+**Python version (CLI / reference engine).** For developers or headless/scripted use — same engine, no desktop install:
 
 ```bash
 pip install gradio pymupdf     # dependencies
