@@ -11,8 +11,8 @@ Open:  http://localhost:7860
 
 Install: pip install gradio pymupdf  (or: pip install gradio pypdf reportlab)
 
-License: MIT — Use freely, modify freely, share freely.
-GitHub:  [your-repo-here]
+License: AGPL-3.0-or-later
+GitHub:  https://github.com/prPMDev/redactabit
 """
 
 __version__ = "1.1.0"
@@ -688,8 +688,8 @@ def build_ui():
 
         gr.HTML("""
         <div style="text-align:center;margin-top:16px;font-size:11px;color:#666;">
-            Redact-a-bit v1.1 · MIT License · Everything runs locally ·
-            <a href="https://github.com" style="color:#888;">GitHub</a>
+            Redact-a-bit v1.1 · AGPLv3 · Everything runs locally ·
+            <a href="https://github.com/prPMDev/redactabit" style="color:#888;">GitHub</a>
         </div>
         """)
 
