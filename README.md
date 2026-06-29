@@ -40,7 +40,7 @@ Label   482-19-3756  →  [SSN REDACTED]    a plain tag
 - **Detection.** Built-in patterns catch structured IDs like SSNs, cards, and account numbers. In the desktop app, optional local [GLiNER](https://github.com/urchade/GLiNER) models also pick up names and addresses; they download the first time you use them.
 - **Repeatable.** The same input always produces the same fake, so a document stays consistent with itself.
 
-It handles PDFs and text files (`.txt`, `.csv`, `.md`, `.json`, `.xml`, `.html`). There's no OCR yet, so scanned PDFs need a real text layer.
+It handles PDFs and plain-text files (`.txt`, `.md`). There's no OCR yet, so scanned PDFs need a real text layer.
 
 ## Get Redact-a-bit
 

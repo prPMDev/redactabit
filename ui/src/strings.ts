@@ -49,6 +49,8 @@ export const COPY = {
   pdfScannedBody: "This looks like a scanned PDF (image only). OCR isn't supported yet.",
   pdfFailTitle: "Couldn't read that file",
   pdfFailBody: "try another file, or paste the text instead",
+  unsupportedTitle: "Unsupported file type",
+  unsupportedBody: "Only PDF and text files (TXT, MD) are supported.",
 
   // result view
   resultPlaceholder: "Your redacted document will appear here.",

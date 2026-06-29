@@ -13,6 +13,40 @@ const REPO_URL = "https://github.com/prPMDev/redactabit";
 // Version spans (About + statusbar) fill from the single source (package.json via Vite define).
 document.querySelectorAll<HTMLElement>("[data-version]").forEach((el) => { el.textContent = `v${__APP_VERSION__}`; });
 
+// ───────── appearance: System / Light / Dark theme ─────────
+// A complete light palette lives in tokens.css ([data-theme="light"]); this activates it.
+// "System" follows the OS via prefers-color-scheme; Light/Dark is an explicit, persisted override.
+// Applied here (not an inline <head> script) because the app CSP blocks inline scripts; it runs
+// at the top of the module to minimize any first-paint flash. renderSegmented is hoisted.
+const THEME_KEY = "redactabit.theme.v1";
+type ThemePref = "system" | "light" | "dark";
+const prefersLight = window.matchMedia("(prefers-color-scheme: light)");
+function themePref(): ThemePref {
+  const v = localStorage.getItem(THEME_KEY);
+  return v === "light" || v === "dark" ? v : "system";
+}
+function applyTheme(pref: ThemePref) {
+  const light = pref === "light" || (pref === "system" && prefersLight.matches);
+  if (light) document.documentElement.setAttribute("data-theme", "light");
+  else document.documentElement.removeAttribute("data-theme");
+}
+applyTheme(themePref());
+prefersLight.addEventListener("change", () => { if (themePref() === "system") applyTheme("system"); });
+(function wireThemeControl() {
+  const seg = document.querySelector<HTMLElement>("#themeSeg");
+  if (!seg) return;
+  const cap = (p: ThemePref) => p.charAt(0).toUpperCase() + p.slice(1);
+  renderSegmented(seg, [{ label: "System" }, { label: "Light" }, { label: "Dark" }], cap(themePref()));
+  const btns = seg.querySelectorAll<HTMLButtonElement>("button");
+  btns.forEach((b) => b.addEventListener("click", () => {
+    btns.forEach((x) => x.setAttribute("aria-pressed", "false"));
+    b.setAttribute("aria-pressed", "true");
+    const pref = ((b.textContent || "").trim().toLowerCase()) as ThemePref;
+    if (pref === "system") localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, pref);
+    applyTheme(pref);
+  }));
+})();
+
 async function openUrlExternal(url: string) {
   try {
     const { openUrl } = await import("@tauri-apps/plugin-opener");
@@ -61,12 +95,14 @@ function redactedName(name: string, level: string, mode: string, ext: string): s
   const safe = (s: string) => s.replace(/[^A-Za-z0-9]+/g, "");
   return [base, safe(level), safe(mode), "redacted"].filter(Boolean).join("_") + "." + ext;
 }
+// Redacted text output keeps the input's extension (.md stays .md), instead of always .txt.
+const textExt = (name: string): string => (name.match(/\.([^.]+)$/)?.[1] || "txt").toLowerCase();
 let lastSavedPath: string | null = null;
 async function saveToFolder(name: string, text: string): Promise<string | null> {
   try {
     const { invoke } = await import("@tauri-apps/api/core");
     const { join } = await import("@tauri-apps/api/path");
-    const full = await join(await currentSaveDir(), redactedName(name, redactMeta.level, redactMeta.mode, "txt"));
+    const full = await join(await currentSaveDir(), redactedName(name, redactMeta.level, redactMeta.mode, textExt(name)));
     await invoke("write_text_file", { path: full, contents: text });
     lastSavedPath = full;
     diag.info("file_saved", {});
@@ -183,7 +219,12 @@ function show(name: string) {
   if (name === "history") renderHistory();
   if (name === "models") placeModelCards();
 }
-navLinks.forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); show(a.dataset.nav!); }));
+navLinks.forEach((a) => {
+  a.addEventListener("click", (e) => { e.preventDefault(); show(a.dataset.nav!); });
+  // href-less anchors don't activate on Enter and Space scrolls the page, so wire keys
+  // explicitly (same pattern as the dropzone) to make the nav keyboard-reachable.
+  a.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); show(a.dataset.nav!); } });
+});
 show("redact");
 
 // ───────── Redact screen elements ─────────
@@ -351,6 +392,12 @@ function fileLoaded(name: string, text: string) {
 // registry (files.ts) owns the formats; this only drives the dropzone states.
 async function loadFile(file: File) {
   const handler = handlerFor(file);
+  if (!handler) { // unsupported type — reject with a clear message instead of reading junk as text
+    diag.warn("file_unsupported", {});
+    setDropzone(COPY.unsupportedTitle, COPY.unsupportedBody);
+    redactBtn.disabled = true;
+    return;
+  }
   if (handler.slow) { setDropzone(`📄 ${file.name}`, COPY.pdfReading); redactBtn.disabled = true; }
   try {
     const text = await handler.read(file);
@@ -690,7 +737,7 @@ function downloadText(name: string, text: string) {
   const blob = new Blob([text], { type: "text/plain" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = redactedName(name, redactMeta.level, redactMeta.mode, "txt");
+  a.download = redactedName(name, redactMeta.level, redactMeta.mode, textExt(name));
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -787,7 +834,17 @@ function renderResult(original: string, redacted: string, changes: Change[]) {
     resultEl.className = "result";
     resultEl.innerHTML = `<div class="icon">⤓</div><div>${COPY.resultPlaceholder}</div>`;
     document.querySelector<HTMLElement>(".content")!.scrollTop = 0;
-    if (pickFile) { currentFile = null; currentIsPdf = false; fileInput.click(); } // "New file": drop stale bytes
+    if (pickFile) {
+      // "New file": reset to the clean zero state (drop the old file completely), THEN open the
+      // picker. If the user cancels the picker, the screen stays at zero state — not the stale
+      // old file still loaded and redactable.
+      currentFile = null; currentIsPdf = false; currentText = ""; currentName = "document.txt";
+      setDropzone(COPY.dropPrompt, fileHint());
+      redactBtn.disabled = true;
+      redactBtn.textContent = COPY.redactNoFile;
+      fileInput.value = ""; // clear so re-picking the same filename still fires `change`
+      fileInput.click();
+    }
   };
   resultEl.querySelector<HTMLButtonElement>("#editBtn")!.addEventListener("click", () => backToInput(false));
   resultEl.querySelector<HTMLButtonElement>("#newFileBtn")!.addEventListener("click", () => backToInput(true));

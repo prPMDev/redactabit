@@ -50,13 +50,17 @@ export const FILE_HANDLERS: FileHandler[] = [
   },
   {
     id: "text",
-    match: () => true, // fallback — must stay last
+    // Plain text only. Structured formats (CSV/JSON/XML/HTML) are deliberately NOT supported:
+    // we'd redact them as text and a fake value (e.g. an address with a comma) can corrupt their
+    // structure — and Redactabit makes AI-ready redactions, not faithful structured copies. Anything
+    // not matched here is unsupported: handlerFor returns undefined and the UI shows a clear message.
+    match: (f) => /\.(txt|md|markdown|log)$/i.test(f.name) || f.type === "text/plain",
     read: (f) => f.text(),
-    accept: [".txt", ".csv", ".md", ".markdown", ".json", ".xml", ".html", ".log", "text/*"],
-    hint: "TXT · CSV · MD",
+    accept: [".txt", ".md", ".markdown", ".log", "text/plain"],
+    hint: "TXT · MD",
   },
 ];
 
-export const handlerFor = (f: File): FileHandler => FILE_HANDLERS.find((h) => h.match(f))!;
+export const handlerFor = (f: File): FileHandler | undefined => FILE_HANDLERS.find((h) => h.match(f));
 export const fileAccept = (): string => FILE_HANDLERS.flatMap((h) => h.accept).join(",");
 export const fileHint = (): string => FILE_HANDLERS.map((h) => h.hint).join(" · ");
