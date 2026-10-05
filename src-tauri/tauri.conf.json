@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Redact-a-bit",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "identifier": "com.redactabit.app",
   "build": {
     "frontendDist": "../ui/dist",

@@ -46,7 +46,7 @@ It handles PDFs and plain-text files (`.txt`, `.md`). There's no OCR yet, so sca
 
 Start on the [website](https://redactabit.com/). It always points to the current build.
 
-**Desktop app.** [Download for Windows](https://github.com/prPMDev/redactabit/releases/latest) is a single installer (around 50 MB) that runs the redactor and the optional detection models without needing Python. macOS and Linux are coming.
+**Desktop app.** [Download for Windows](https://github.com/prPMDev/redactabit/releases/latest) is a single installer (under 10 MB) that runs the redactor and the optional detection models without needing Python. macOS and Linux are coming.
 
 **Python version (CLI / reference engine).** For developers or headless/scripted use — same engine, no desktop install:
 
@@ -79,7 +79,7 @@ Tests run with `pytest` (the engine) and `npm test` (the desktop engine and dete
 
 **Today.** The redaction engine in Python and TypeScript, three levels and three modes, the regex floor plus GLiNER detection, PDF and text support, and repeatable fakes. It's US-focused for now.
 
-**Next.** Signed installers for macOS and Linux, and bundling the model runtime so even the first run works offline.
+**Next.** Signed installers for macOS and Linux.
 
 **Later.** More countries (UK, India, the EU), keeping PDF layout intact, and OCR for scanned files.
 
