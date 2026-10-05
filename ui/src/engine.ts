@@ -331,6 +331,25 @@ export function redact(
   return resolve(text, raw, mode, fk);
 }
 
+// Numeric-ID plausibility for model spans. A model can pin an ID label on a plain number —
+// GLiNER PII base called "$1,250.00" a credit card and a 5-digit reference an account number —
+// and that span would then redact a number the level promises to keep (LEVELS `keeps`: strip
+// identity, keep the numbers). So a BARE NUMBER the model wants swapped for a fake card/account
+// has to look like one: enough digits, and no currency symbol in front. Keyed by Faker method,
+// the name every model's manifest labels already reference — no manifest field to add, and a
+// stale remote manifest can't switch it off. Spans with letters (names, addresses, alphanumeric
+// IDs, masked "XXXX-1234") are never second-guessed: recall still beats precision there.
+// ponytail: an amount with no symbol in front ("123,456.78" in a column, "1.234.567,89 €") still
+// passes as an 8+ digit account; add a number-format check if a model is seen doing that.
+const MIN_ID_DIGITS = new Map([["card", 12], ["account", 8]]); // shortest card number; the Bank Account rule's floor
+export function plausibleId(text: string, m: RawMatch): boolean {
+  const min = MIN_ID_DIGITS.get(m.fake);
+  const span = text.slice(m.start, m.end);
+  if (min === undefined || /\p{L}/u.test(span)) return true;
+  const d = m.start + span.search(/\d/); // first digit — where a currency symbol would sit in front
+  return digits(span).length >= min && !/\p{Sc}[\s(-]?$/u.test(text.slice(Math.max(0, d - 2), d));
+}
+
 /**
  * Async redaction — same resolver, but also runs extra (possibly async) detectors
  * such as a downloaded NER model. Not-ready detectors are skipped (regex-only
@@ -362,7 +381,9 @@ export async function redactAsync(
   for (let i = 0; i < extras.length; i++) {
     const base = 0.06 + 0.86 * (i / extras.length), span = 0.86 / extras.length;
     const cb = onProgress ? (f: number) => onProgress(base + span * Math.min(1, Math.max(0, f)), "model") : undefined;
-    raw.push(...(await extras[i].detect(text, cb)));
+    const found = await extras[i].detect(text, cb);
+    // Heavy hides amounts itself and promises no numeric keeps, so there the model is taken at its word.
+    raw.push(...(level < 3 ? found.filter((m) => plausibleId(text, m)) : found));
     onProgress?.(0.06 + 0.86 * ((i + 1) / extras.length), "model");
   }
   onProgress?.(0.94, "apply");
