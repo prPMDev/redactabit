@@ -12,7 +12,7 @@ export default defineConfig({
   clearScreen: false,
   // Single version source: package.json (Cargo.toml/tauri.conf.json stay manual — see release checklist).
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
-  // transformers.js + onnxruntime-web ship their own ESM + wasm; don't let Vite pre-bundle
+  // onnxruntime-web + mupdf ship their own ESM + wasm; don't let Vite pre-bundle
   // them (it breaks the import.meta.url-based wasm path resolution).
-  optimizeDeps: { exclude: ["@huggingface/transformers", "onnxruntime-web", "mupdf"] },
+  optimizeDeps: { exclude: ["onnxruntime-web", "mupdf"] },
 });

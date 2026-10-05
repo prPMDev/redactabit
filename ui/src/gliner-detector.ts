@@ -1,11 +1,11 @@
 // GLiNER detector — zero-shot NER (names/addresses) run locally in the webview.
 //
 // This is a hand-rolled port of GLiNER.js's span pipeline (MIT, github Ingvarstep/GLiNER.js:
-// src/lib/{processor,decoder,model}.ts) onto OUR OWN runtime — the @huggingface/transformers
-// tokenizer + its onnxruntime-web — instead of taking the `gliner` npm package as a dependency.
+// src/lib/{processor,decoder,model}.ts) onto OUR OWN runtime — the @huggingface/tokenizers
+// tokenizer + onnxruntime-web — instead of taking the `gliner` npm package as a dependency.
 // Why: that package pins the old @xenova/transformers stack, which drags a CRITICAL, unpatchable
-// protobufjs RCE (GHSA-xq3m-2v4x-88gg) + a second ML runtime. We reuse what the app already ships:
-// no new deps, no new vulnerabilities, one clean stack. Capability validated in docs/gliner-spike/.
+// protobufjs RCE (GHSA-xq3m-2v4x-88gg) + a second ML runtime. We ship just the two pieces the
+// pipeline needs: no new vulnerabilities, one clean stack. Capability validated in docs/gliner-spike/.
 //
 // The model returns CHARACTER offsets for each span, so (unlike bert-NER) there is no fragile
 // word-relocation step — offsets map straight onto the original text.
@@ -188,18 +188,23 @@ export class GLiNERDetector implements Detector {
 
   ready(): boolean { return this.session !== null && this.tok !== null; }
 
-  /** Load tokenizer + ONNX session once (idempotent), reusing the app's transformers.js runtime. */
+  /** Load tokenizer + ONNX session once (idempotent). */
   load(onProgress?: (p: unknown) => void): Promise<void> {
     if (this.session && this.tok) return Promise.resolve();
     if (!this.loading) {
       this.loading = (async () => {
-        const { AutoTokenizer, env } = await import("@huggingface/transformers");
-        env.allowLocalModels = false;
-        // Import onnxruntime-web directly (the SAME hoisted instance transformers.js uses): we need
-        // InferenceSession + Tensor, and transformers only exposes the ORT *config* (env.backends.onnx).
-        const ort = await import("onnxruntime-web");
+        const { Tokenizer } = await import("@huggingface/tokenizers");
+        // The wasm-only entry: "wasm" is the only execution provider we ask for, and the default
+        // entry ships a WebGPU-capable binary twice the size.
+        const ort = await import("onnxruntime-web/wasm");
         this.Tensor = ort.Tensor as unknown as TensorCtor;
-        this.tok = (await AutoTokenizer.from_pretrained(this.src.repo, { progress_callback: onProgress })) as unknown as Tok;
+        // The tokenizer is two JSON files in the model's HF repo, cached like the weights.
+        const json = async (file: string) => JSON.parse(new TextDecoder().decode(await fetchCached(hfUrl(this.src.repo, file), file)));
+        const cfg = await json("tokenizer_config.json");
+        const tk = new Tokenizer(await json("tokenizer.json"), cfg);
+        const sep = tk.token_to_id(typeof cfg.sep_token === "string" ? cfg.sep_token : cfg.sep_token?.content);
+        if (sep === undefined) throw new Error(`GLiNER tokenizer has no sep token: ${this.src.repo}`);
+        this.tok = { encode: (t) => tk.encode(t).ids, sep_token_id: sep };
         // GLiNER's prompt needs <<ENT>>/<<SEP>> as single special tokens; if the tokenizer doesn't
         // know them the prompt is malformed -> weak recall (not a mislocation). Surface it once.
         if (this.tok.encode("<<ENT>>").length !== 3 || this.tok.encode("<<SEP>>").length !== 3)
@@ -297,8 +302,9 @@ export class GLiNERDetector implements Detector {
 /** Fetch the ONNX weights: local bundle, else the Cache API copy, else HF — then PERSIST the
  *  download in the Cache API so a restart never re-pulls ~200 MB from throttled HF. */
 const MODEL_CACHE = "redactabit-models-v1";
+const hfUrl = (repo: string, file: string): string => `https://huggingface.co/${repo}/resolve/main/${file}`;
 // Single source of truth for a model's weights URL — fetch + remove must agree on the cache key.
-const modelUrlOf = (src: GlinerModelSource): string => src.modelUrl ?? `https://huggingface.co/${src.repo}/resolve/main/${src.file}`;
+const modelUrlOf = (src: GlinerModelSource): string => src.modelUrl ?? hfUrl(src.repo, src.file);
 
 async function fetchModel(src: GlinerModelSource, onProgress?: (p: unknown) => void): Promise<Uint8Array> {
   if (src.localFile) {
@@ -308,20 +314,28 @@ async function fetchModel(src: GlinerModelSource, onProgress?: (p: unknown) => v
     } catch { /* not bundled — fall through */ }
   }
   // Weights live wherever the manifest says (Releases/R2/own mirror); default is the HF repo file.
-  const url = modelUrlOf(src);
-  // Downloaded before? Serve from persistent cache storage (instant + offline).
+  return fetchCached(modelUrlOf(src), src.file, onProgress);
+}
+
+// One model file (weights or tokenizer JSON): the Cache API copy, else download + persist.
+async function fetchCached(url: string, file: string, onProgress?: (p: unknown) => void): Promise<Uint8Array> {
+  // Downloaded before? Serve from persistent cache storage (instant + offline). Looks in EVERY
+  // cache, not only ours: tokenizer files fetched by <= 0.2.0 sit in transformers.js's own cache
+  // under this same URL, so an updated install still loads offline.
   try {
     if (typeof caches !== "undefined") {
-      const hit = await (await caches.open(MODEL_CACHE)).match(url);
+      const hit = await caches.match(url);
       if (hit) return new Uint8Array(await hit.arrayBuffer());
     }
   } catch { /* cache unavailable (insecure context etc.) — plain download below */ }
 
   const r = await fetch(url);
-  if (!r.ok) throw new Error(`GLiNER model download failed: ${r.status} for ${src.file}`);
+  if (!r.ok) throw new Error(`GLiNER model download failed: ${r.status} for ${file}`);
   const total = Number(r.headers.get("content-length"));
   let buf: Uint8Array;
-  if (!r.body || !total) {
+  // No progress wanted (the tokenizer JSON) -> no need to stream. The preallocated path also
+  // trusts content-length, which would under-allocate if a host ever served the JSON compressed.
+  if (!onProgress || !r.body || !total) {
     buf = new Uint8Array(await r.arrayBuffer());
   } else {
     // Stream into a single preallocated buffer (no chunk list + reassembly — the model is ~200 MB,
@@ -333,12 +347,12 @@ async function fetchModel(src: GlinerModelSource, onProgress?: (p: unknown) => v
       const { done, value } = await reader.read();
       if (done) break;
       buf.set(value, loaded); loaded += value.length;
-      onProgress?.({ status: "progress", progress: (loaded / total) * 100, file: src.file });
+      onProgress({ status: "progress", progress: (loaded / total) * 100, file });
     }
   }
   try {
     if (typeof caches !== "undefined")
       await (await caches.open(MODEL_CACHE)).put(url, new Response(buf.slice().buffer, { headers: { "Content-Type": "application/octet-stream" } }));
-  } catch (e) { diag.warn("model_cache_put_failed", { file: src.file, quota: String((e as Error)?.name) }); }
+  } catch (e) { diag.warn("model_cache_put_failed", { file, quota: String((e as Error)?.name) }); }
   return buf;
 }

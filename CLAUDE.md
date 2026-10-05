@@ -33,14 +33,15 @@ Frontend (`ui/src/`), all TypeScript, bundled by Vite and run inside the Tauri W
 engine.ts          → Shipped redaction engine. Faithful TS port of redactabit.py (sync cyrb53 +
                       mulberry32 for determinism). Imports nothing. Owns the MODES / LEVELS /
                       PATTERNS registries (anything that changes output bytes).
-gliner-detector.ts → Hand-rolled GLiNER NER port (onnxruntime-web + @huggingface/transformers
+gliner-detector.ts → Hand-rolled GLiNER NER port (onnxruntime-web + @huggingface/tokenizers
                       tokenizer) for local name/address detection. NOT the vulnerable `gliner` npm
                       package — its span pipeline was ported in-house. Includes sweepNames()
                       (a model-confirmed name becomes a document-wide exact term).
 pdf-redact.ts      → True PDF-as-PDF redaction: mupdf-wasm removes the PII glyphs from the content
                       stream, pdf-lib draws the fake/mask/tag replacement. Re-extracts the output
                       and REFUSES to save if any original PII string survives (verify-or-refuse).
-files.ts           → File-type handlers + PDF text extraction via pdf.js (pdfjs-dist).
+files.ts           → File-type handlers + PDF text extraction via mupdf-wasm (rows regrouped
+                      by baseline). Owns the shared lazy mupdf loader.
 catalog.ts         → Builds model definitions from the manifest: a bundled seed
                       (models.seed.json) + a best-effort, fail-silent remote overlay
                       (site/models.json). Offline-first.
@@ -127,7 +128,7 @@ of `{seed}:{original_value}:{counter}` to seed a `random.Random` per replacement
 ## Dependencies
 
 **Desktop app** (`package.json`): `@tauri-apps/api` + `@tauri-apps/cli` + plugins (`dialog`,
-`opener`), `@huggingface/transformers`, `onnxruntime-web`, `mupdf`, `pdf-lib`, `pdfjs-dist`; dev:
+`opener`), `@huggingface/tokenizers`, `onnxruntime-web`, `mupdf`, `pdf-lib`; dev:
 `vite`, `typescript`, `vitest`. Rust (`src-tauri/Cargo.toml`): `tauri` 2.x, `serde`/`serde_json`,
 `log`, `tauri-plugin-{log,opener,dialog}`.
 

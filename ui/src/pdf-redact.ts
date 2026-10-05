@@ -2,9 +2,10 @@
 // visual). mupdf.js Redact annotations can't draw replacement text, so we split the job —
 // mupdf for content-stream removal (proven in the Phase-2 spike), pdf-lib (MIT) for a white box
 // + Helvetica replacement, mirroring the legacy redactabit.py PyMuPDF behavior (redactabit.py:468-487).
-// main.ts dynamic-imports this module only on a PDF save, so mupdf/pdf-lib stay out of the main
-// bundle; mupdf itself is dynamic-imported here (it loads its own wasm).
+// main.ts dynamic-imports this module only on a PDF save, so pdf-lib stays out of the main
+// bundle; mupdf is already loaded by then (files.ts read the PDF with it).
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { loadMupdf } from "./files";
 
 export interface ReplacePair { original: string; replacement: string; }
 interface Placement { pageIndex: number; rect: [number, number, number, number]; replacement: string; }
@@ -18,13 +19,6 @@ export function rectOfQuad(q: any): [number, number, number, number] {
   else if (q && q.ul) nums = [q.ul.x, q.ul.y, q.ur.x, q.ur.y, q.ll.x, q.ll.y, q.lr.x, q.lr.y];
   const xs = nums.filter((_, i) => i % 2 === 0), ys = nums.filter((_, i) => i % 2 === 1);
   return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
-}
-
-async function loadMupdf(): Promise<any> {
-  const mod: any = await import("mupdf");
-  const mupdf = mod.default ?? mod;
-  if (mupdf.ready && typeof mupdf.ready.then === "function") await mupdf.ready; // some builds init async
-  return mupdf;
 }
 
 // Remove every occurrence of each `original` (true content-stream removal via mupdf), then draw its

@@ -1,9 +1,6 @@
 // File handlers — single source of truth for "which files we accept and how we read them".
 // Each handler turns a File into plain text (or throws). Adding a format = one entry
 // before the text fallback. The engine never sees files; it only redacts strings.
-import * as pdfjsLib from "pdfjs-dist";
-import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 export interface FileHandler {
   id: string;
@@ -14,29 +11,48 @@ export interface FileHandler {
   hint: string;                          // dropzone label fragment
 }
 
-// Extract text from a PDF locally (pdf.js, no network). Groups items into lines by
-// vertical position: raw but readable. Faithful table structure is a later pass.
+// mupdf loads its own ~10 MB wasm, so it is dynamic-imported: out of the main bundle until the
+// first PDF is opened. pdf-redact.ts reuses this loader for the save path.
+export async function loadMupdf(): Promise<any> {
+  const mod: any = await import("mupdf");
+  const mupdf = mod.default ?? mod;
+  if (mupdf.ready && typeof mupdf.ready.then === "function") await mupdf.ready; // some builds init async
+  return mupdf;
+}
+
+// Extract text from a PDF locally (mupdf, no network). mupdf ends a line at every wide gap
+// (table cells, label/value columns), so its lines are regrouped into rows by baseline: the
+// same-line rules ("Taxpayer: Jane Doe") need the whole row. Raw but readable; faithful table
+// structure is a later pass.
+// ponytail: runs on the main thread (~2 ms/page); yield between pages if huge PDFs stutter.
 async function extractPdfText(file: File): Promise<string> {
-  const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-  const pages: string[] = [];
-  for (let p = 1; p <= pdf.numPages; p++) {
-    const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    const lines: string[] = [];
-    let line = "";
-    let lastY: number | null = null;
-    for (const item of content.items as any[]) {
-      if (typeof item.str !== "string") continue; // skip non-text marks
-      const y = item.transform[5] as number;
-      if (lastY !== null && Math.abs(y - lastY) > 2 && line) { lines.push(line.trimEnd()); line = ""; }
-      line += item.str + " ";
-      lastY = y;
+  const mupdf = await loadMupdf();
+  const doc = mupdf.Document.openDocument(await file.arrayBuffer(), "application/pdf");
+  try {
+    // Without its password every page reads as empty, which would be reported as "scanned".
+    if (doc.needsPassword()) throw new Error("password-protected PDF");
+    const pages: string[] = [];
+    for (let p = 0; p < doc.countPages(); p++) {
+      const page = doc.loadPage(p), stext = page.toStructuredText();
+      const blocks = JSON.parse(stext.asJSON()).blocks as { lines?: { y: number; text: string }[] }[];
+      // Free the wasm copies now: finalizers can't run inside this sync loop, so a long PDF would
+      // otherwise hold every page's text at once (~115 MB for 400 dense pages).
+      stext.destroy(); page.destroy();
+      const lines: string[] = [];
+      let line = "";
+      let lastY: number | null = null;
+      for (const l of blocks.flatMap((b) => b.lines ?? [])) { // image blocks carry no lines
+        if (lastY !== null && Math.abs(l.y - lastY) > 2 && line) { lines.push(line.trimEnd()); line = ""; }
+        line += l.text + " ";
+        lastY = l.y;
+      }
+      if (line.trim()) lines.push(line.trimEnd());
+      pages.push(lines.join("\n"));
     }
-    if (line.trim()) lines.push(line.trimEnd());
-    pages.push(lines.join("\n"));
+    return pages.join("\n\n");
+  } finally {
+    doc.destroy();
   }
-  return pages.join("\n\n");
 }
 
 export const FILE_HANDLERS: FileHandler[] = [
