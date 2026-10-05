@@ -24,7 +24,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; worker-src 'self' blob:; connect-src 'self' ws: https://huggingface.co https://*.huggingface.co https://*.hf.co https://cdn.jsdelivr.net https://redactabit.com"
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; worker-src 'self' blob:; connect-src 'self' ipc: http://ipc.localhost ws: https://huggingface.co https://*.huggingface.co https://*.hf.co https://redactabit.com"
     }
   },
   "bundle": {
