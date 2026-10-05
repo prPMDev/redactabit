@@ -1,8 +1,10 @@
 // Guards the hand-rolled GLiNER port's pure logic (no model download): the leak-critical
-// span placement (decode), the encode words_mask, word offsets, and greedy overlap.
+// span placement (decode), the encode words_mask, word offsets, and greedy overlap — plus
+// what the engine does with the model's numeric-ID spans (synthetic spans, same no-model rule).
 import { describe, it, expect } from "vitest";
 import { splitWords, encode, greedyFlat, decodeSpans, titleCaseShout, sweepNames, type GlinerLabel, type Span, type Tok } from "./gliner-detector";
-import type { RawMatch } from "./engine";
+import { redactAsync, plausibleId, Faker, MODEL_PRIORITY, type Detector, type RawMatch } from "./engine";
+import seed from "./models.seed.json";
 
 // The label config used by the sweep tests — mirrors the gliner_small registry entry.
 const SWEEP_LABELS: GlinerLabel[] = [
@@ -104,6 +106,91 @@ describe("GLiNER port — consistency sweep (confirmed names cover the whole doc
     const swept = sweepNames(text, [person(text, "Jordan Mercer")], [{ name: "person", fake: "name", sweep: true }]);
     expect(swept.length).toBeGreaterThan(0);
     expect(swept.every((s) => s.tag === "[PERSON REDACTED]")).toBe(true);
+  });
+});
+
+// Labels come from the SHIPPED manifest, so these also pin that both models' card/account
+// labels still carry the Faker kinds the guard keys on.
+const labelsOf = (id: string): GlinerLabel[] => seed.models.find((m) => m.id === id)!.source.labels;
+// A span exactly as GLiNERDetector.detect() emits it.
+const span = (text: string, sub: string, label: string, labels = labelsOf("gliner-pii")): RawMatch => {
+  const l = labels.find((x) => x.name === label)!;
+  const start = text.indexOf(sub);
+  return { start, end: start + sub.length, label: `NER:${label}`, priority: MODEL_PRIORITY, fake: l.fake ?? "", mask: null, tag: l.tag ?? "" };
+};
+
+describe("GLiNER spans — a numeric-ID label has to fit the number (keep the numbers below Heavy)", () => {
+  // The 2026-10-04 GLiNER PII base run (Standard, Fake), replayed from its decoded spans.
+  const TEXT = [
+    "Meeting notes, 12 March.",
+    "Priya Venkataraman called about the refund and asked that Marcus Oyelaran be copied.",
+    "The check was mailed to Elena Kowalczyk at her home in Lakewood.",
+    "PAYMENT RECEIVED FROM OYELARAN, MARCUS ref 88213",
+    "Later, Priya confirmed the amount of $1,250.00 with Dr. Kowalczyk.",
+  ].join("\n");
+  const OBSERVED: [label: string, sub: string][] = [
+    ["name", "Priya Venkataraman"], ["name", "Marcus Oyelaran"], ["name", "Elena Kowalczyk"], ["location city", "Lakewood"],
+    ["account number", "88213"], ["credit card", "$1,250.00"], ["name", "Dr. Kowalczyk"],
+  ];
+  const model: Detector = { name: "gliner", ready: () => true, detect: (t) => OBSERVED.map(([label, sub]) => span(t, sub, label)) };
+  // -> the output text + which detector (if any) redacted a given original string
+  const run = async (level: number) => {
+    const r = await redactAsync(TEXT, level, "fake", [], new Faker("seed"), [model]);
+    return { text: r.text, by: (sub: string) => r.changes.find((c) => c.fullOriginal === sub)?.pattern };
+  };
+
+  it("Standard keeps the amount and the short reference; every name and the city still go", async () => {
+    const { text, by } = await run(2);
+    expect(text).toContain("the amount of $1,250.00 with");
+    expect(text).toContain("ref 88213");
+    for (const sub of ["Priya Venkataraman", "Marcus Oyelaran", "Elena Kowalczyk", "Dr. Kowalczyk"]) expect(by(sub)).toBe("NER:name");
+    expect(by("Lakewood")).toBe("NER:location city");
+  });
+
+  it("Light keeps them too (it promises all amounts)", async () => {
+    const { text } = await run(1);
+    expect(text).toContain("$1,250.00");
+    expect(text).toContain("ref 88213");
+  });
+
+  it("Heavy is untouched: the amount goes via the Dollar Amounts rule, the reference via the model", async () => {
+    const { text, by } = await run(3);
+    expect(by("$1,250.00")).toBe("Dollar Amounts"); // regex (20) outranks the model span (15)
+    expect(by("88213")).toBe("NER:account number"); // no numeric keeps at Heavy -> the model is taken at its word
+    expect(text).not.toContain("$1,250.00");
+  });
+
+  const ok = (text: string, sub: string, label: string, labels?: GlinerLabel[]) => plausibleId(text, span(text, sub, label, labels));
+
+  it("rejects a card/account label on an amount or on too short a number", () => {
+    expect(ok("the amount of $1,250.00 with", "$1,250.00", "credit card")).toBe(false);
+    expect(ok("the amount of $1,250.00 with", "1,250.00", "credit card")).toBe(false); // symbol just outside the span
+    expect(ok("balance $1,234,567.89 today", "$1,234,567.89", "account number")).toBe(false); // enough digits, still an amount
+    expect(ok("balance $(1,234,567.89) today", "1,234,567.89", "bank account")).toBe(false); // accounting negative
+    expect(ok("MARCUS ref 88213", "88213", "account number")).toBe(false);
+    expect(ok("MARCUS ref 88213", "88213", "bank account")).toBe(false);
+    expect(ok("code 4111 1111 today", "4111 1111", "credit card")).toBe(false); // 8 digits: an account maybe, never a card
+  });
+
+  it("accepts plausible IDs, including shapes the built-in rules miss", () => {
+    expect(ok("Amex 3782 822463 10005 on file", "3782 822463 10005", "credit card")).toBe(true); // 15 digits, not 4-4-4-4
+    expect(ok("paid from 000123456789 today", "000123456789", "account number")).toBe(true); // no "account" keyword nearby
+    expect(ok("12345678 $50.00", "12345678", "bank account")).toBe(true); // a symbol AFTER the number is the next column
+  });
+
+  it("never second-guesses a span with letters, or a name/address label (recall first)", () => {
+    expect(ok("card XXXX-XXXX-XXXX-1234", "XXXX-XXXX-XXXX-1234", "credit card")).toBe(true); // masked: 4 digits
+    expect(ok("brokerage U1234567", "U1234567", "account number")).toBe(true); // alphanumeric: 7 digits
+    expect(ok("lives at 742 Evergreen Terrace", "742", "location street")).toBe(true);
+    expect(ok("owes $5 Bill", "$5 Bill", "name")).toBe(true);
+  });
+
+  it("covers the multi-PII model's labels the same way (keyed by Faker kind, not label name)", () => {
+    const multi = labelsOf("gliner-multi-pii");
+    expect(ok("Betrag €1.250,00 fällig", "€1.250,00", "credit card number", multi)).toBe(false);
+    expect(ok("Referenz 88213", "88213", "bank account number", multi)).toBe(false);
+    expect(ok("Konto 1234567890", "1234567890", "bank account number", multi)).toBe(true);
+    expect(ok("Karte 4111 1111 1111 1111", "4111 1111 1111 1111", "credit card number", multi)).toBe(true);
   });
 });
 
