@@ -57,10 +57,11 @@ Backend (`src-tauri/`), Rust:
 src/lib.rs         → Tauri commands: write_text_file, ensure_dir, write_bytes_file; registers the
                       opener / dialog / log plugins.
 src/main.rs        → Entry point.
-tauri.conf.json    → productName "Redact-a-bit", identifier com.redactabit.app, window config, CSP,
-                      NSIS installer hooks.
-windows/hooks.nsh  → NSIS uninstall hook: wipes %LOCALAPPDATA%\com.redactabit.app (downloaded
-                      models, history) on a real uninstall, but not on update.
+tauri.conf.json    → productName "Redact-a-bit", identifier com.redactabit.app, window config, CSP.
+                      No custom NSIS hooks: app data (%LOCALAPPDATA%\com.redactabit.app — models,
+                      history) is deleted only when the user ticks the uninstaller's own "Delete app
+                      data" box. A wipe-on-uninstall hook (removed in 0.2.2) also fired during
+                      upgrades, because the installer's default choice runs the old uninstaller.
 ```
 
 `scripts/sync-seed.mjs` copies the canonical `site/models.json` → `ui/src/models.seed.json` on
